@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+    <name>Drools</name>
+    
+    <shortDescription>
+        Process a table using Drools. Output is a single table.
+    </shortDescription>
+    
+    <fullDescription>    
+        <intro>
+        Process a table using Drools. Output is a single table.
+        <ol>
+        <li>Input is added to Drools as KnimeInput assertion.</li>
+        <li>Drools executed (incrementally or at the end)</li>
+        <li>When data input is complete, a KnimeControl message will be asserted, followed by a final Drools execution.</li>
+        <li>Output (KnimeOuput assertion) is sent to the output port.</li>
+        </ol>
+
+        Your Drools rules file is specified in the configuration dialog. It may be a .drl or .xml (change set). If you have a change set, ensure that the files specified in the .xml are of type file resource.
+        Your Drools file should specify
+        <ol>
+        <li>the columns/fields for the KnimeInput and KnimeOutput classes.</li>
+        <li>the processing of the KnimeInput to produce the KnimeOuput.</li>
+        <li>KnimeInput must have a <b>_key</b> column of type String</li>
+        </ol>
+		These should match (or be a subset) of the input data.
+        Ensure that the file also necessary Java import statements.
+        The program relies on a Drools query, "Knime results", which is called to gather the output table data.         
+        Here is the default Drools file, which will run if none is specified.
+<pre>      
+package org.eeat.drools.rbs;
+
+import java.util.Date;
+import org.eeat.model.*;
+import org.eeat.model.ocl.*;
+import org.eeat.drools.rbs.*;
+import org.knime.core.data.*;
+import org.knime.core.node.*;
+import org.knime.core.data.def.*;
+import java.util.*;
+
+// Event declarations cannot be Interfaces, but must be Classes
+// When the node processing is complete, a KnimeControl message will be asserted, followed by a final Drools execution.
+declare KnimeControl
+	@role(event)
+	message : String
+	date : long
+end
+
+// Change the default object definitions to match your input and output data
+// Column names and order must match the definitions, below.
+
+// Default input object retrieved from KNIME 
+declare KnimeInput
+	_key : String
+    column1 : Integer
+    column2 : String
+    column3 : Double
+    column4 : String
+end
+
+// Default output object, which will be sent back to KNIME
+// Position ensures output columns are in the desired order in the KNIME output table.
+declare KnimeOutput
+    column1 : Integer @position(0)
+    column2 : String @position(1)
+    column3 : Double @position(2)
+    column4 : String @position(3)
+end
+ 
+ // TODO change to Interface type
+global org.eeat.drools.rbs.Drools parent;
+global org.knime.core.node.BufferedDataTable knimeInputData;
+global org.knime.core.node.BufferedDataTable knimeOutputData;
+
+// Query
+query "Knime results"
+  out : KnimeOutput()
+end
+
+// Rules
+rule "Default data transformation"
+  salience -100
+  no-loop
+  when
+    $i : KnimeInput()
+  then
+    KnimeOutput no = new KnimeOutput();
+    no.setColumn1($i.getColumn1() +1);
+    no.setColumn2($i.getColumn2() + "zzz");
+    no.setColumn3($i.getColumn3() + 10);
+    no.setColumn4($i.getColumn4() + "zzz");
+    insert(no);
+end
+
+rule "Output data"
+  no-loop
+  when
+    $i : KnimeOutput()
+  then
+   parent.getLog().debug(String.format("KNIME output: %s",$i));   
+end
+
+rule "Input data"
+  no-loop
+  when
+    $i : KnimeInput()
+  then
+   parent.getLog().debug(String.format("KNIME input: %s",$i));   
+end
+
+rule "Test this file loading"
+  no-loop
+  when
+	eval (true)
+  then  	
+  	parent.getLog().debug("Property file loaded successfully.");
+end     
+</pre>   
+        </intro>
+        
+        
+        
+        <option name="Drools rules file">The drool file to load. May be .drl or .xml (change set)</option>
+        <option name="Execute incremental">If true, the Drools will execute after each row is inserted. 
+        Otherwise, all rows will be inserted and then Drools will execute. This later batch approach will typically exhaust memory for data sets above 5,000 records.</option>
+        <!-- possibly more options that can also be grouped by tabs -->
+        <!--
+        <tab name="Standard Options">
+            <option name="short name of first option (like in the dialog)">description of first option</option>
+            <option name="short name of second option (like in the dialog)">description of second option</option>
+        </tab>
+        <tab name="Advanced Options">
+            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
+        </tab>
+        -->
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="In-Port name">Input data can be arbitrary data. Drools will process Integer, Long, Double, and String properly. This data will be represented in Drools as the KnimeInput object.</inPort>
+        <!-- possibly more input ports here-->
+        <outPort index="0" name="Out-Port name">Input data can be arbitrary data. Drools will process Integer, Long, Double, and String properly. This data will be represented in Drools as the KnimeOutput object.</outPort>
+        <!-- possibly more output ports here-->
+    </ports>    
+    <views>
+        <view index="0" name="No view yet">Open using the default view.</view>
+        <!--view index="1" name="name of second view">Description of second view...</view-->
+    </views>
+</knimeNode>
