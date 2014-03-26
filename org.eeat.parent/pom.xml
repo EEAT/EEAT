@@ -38,42 +38,14 @@
 		<module>../org.eeat.logging.api</module>
 
 		<!-- server -->
-		<module>../org.eeat.core</module>
-		<module>../org.eeat.log4jproperties</module>
-		<module>../org.eeat.repository.drools</module>
-		
+		<module>../org.eeat.core</module>	
 		<module>../org.eeat.drools.rbs</module>
 
 		
 		<!--  KNIME -->
-		<!-- <module>../org.eeat.knime.google.bigquery.node</module> -->
-		<module>../org.eeat.knime.hmm.node</module>
-		<module>../org.eeat.knime.hmm.pointfinder</module>
-		<module>../org.eeat.knime.hmm.reader</module>
-		<module>../org.eeat.knime.motif</module>
-		<module>../org.eeat.knime.treediff</module>
-		<module>../org.eeat.knime.google.bigquery.node</module>
 		<module>../org.eeat.knime.drools.node</module>
-		<module>../org.eeat.knime.mongo.node</module>
 		
-		<module>../org.eeat.knime.git.commentprinter</module>
-		<module>../org.eeat.knime.git.issuecommentprinter</module>
-		<module>../org.eeat.knime.git.issueprinter</module>
-		<module>../org.eeat.knime.git.prcommentprinter</module>
-		<module>../org.eeat.knime.git.prprinter</module>
-
-
-		<!-- feature -->
-		<module>../org.eeat.repository.drools.feature</module>
-
-		<!-- KNIME feature -->
-		<module>../org.eeat.knime.hmm.feature</module>
-		<module>../org.eeat.knime.decisiontree.feature</module>
-		<module>../org.eeat.knime.connector.feature</module>
-		<module>../org.eeat.knime.drools.feature</module>		
-
-		<!-- site -->
-		<module>../org.eeat.updatesite</module>		
+	
 	</modules>
 
 	<dependencyManagement>
