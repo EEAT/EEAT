@@ -1,0 +1,116 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.eeat</groupId>
+		<artifactId>org.eeat.parent</artifactId>
+		<version>3.0.0-SNAPSHOT</version>
+		<relativePath>../org.eeat.parent/pom.xml</relativePath>
+	</parent>
+	<artifactId>org.eeat.repository.drools</artifactId>
+	<description>EEAT Drools-based repository</description>
+	<name>org.eeat.repository.drools</name>
+	<packaging>eclipse-plugin</packaging>
+	<properties>
+		<drools-version>5.5.0.Final</drools-version>
+	</properties>
+
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+	</build>
+
+	
+	<!--
+		Basic dependencies. When maven runs, it will create target/dependencies. 
+		All non-Eclipse references should be included in the MANIFEST.MF Runtime path.
+		Oddly, if xml-apis.jar is in classpath, then this component will fail silently.
+		(don't include xml-apis in the classpath)		 
+	 -->
+
+	<dependencies>
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-core</artifactId>
+			<version>${drools-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>knowledge-api</artifactId>
+			<version>${drools-version}</version>
+		</dependency>
+<!-- 		
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-api</artifactId>
+			<version>${drools-version}</version>
+		</dependency>
+ -->				
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-compiler</artifactId>
+			<version>${drools-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-decisiontables</artifactId>
+			<version>${drools-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-persistence-jpa</artifactId>
+			<version>${drools-version}</version>
+		</dependency>
+<!-- 
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-transformer-xstream</artifactId>
+			<version>${drools-version}</version>
+		</dependency>
+ -->		
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.12.1.GA</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>			
+
+		<dependency>
+			<groupId>xerces</groupId>
+			<artifactId>xercesImpl</artifactId>
+			<version>2.9.1</version>
+		</dependency>	
+
+		<dependency>
+			<groupId>net.sourceforge.jtds</groupId>
+			<artifactId>jtds</artifactId>
+			<version>1.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.4.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j.impl</groupId>
+			<artifactId>slf4j-osgi</artifactId>
+			<version>1.6.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate</artifactId>
+			<version>3.6.0.Beta2</version>
+			<type>pom</type>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+</project>

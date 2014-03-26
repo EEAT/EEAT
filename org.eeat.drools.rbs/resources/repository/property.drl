@@ -1,0 +1,82 @@
+package org.eeat.drools.rbs;
+
+import java.util.Date;
+import org.eeat.model.*;
+import org.eeat.model.ocl.*;
+import org.eeat.drools.rbs.*;
+import org.knime.core.data.*;
+import org.knime.core.node.*;
+import org.knime.core.data.def.*;
+import java.util.*;
+
+// Event declarations cannot be Interfaces, but must be Classes
+
+// Change the default object definitions to match your input and output data
+// Column names and order must match the definitions, below.
+
+// Default input object retrieved from KNIME 
+declare KnimeInput
+    column1 : Integer
+    column2 : String
+    column3 : Double
+    column4 : String
+end
+
+// Default output object, which will be sent back to KNIME
+// Position ensures output columns are in the desired order in the KNIME output table.
+declare KnimeOutput
+    column1 : Integer @position(0)
+    column2 : String @position(1)
+    column3 : Double @position(2)
+    column4 : String @position(3)
+end
+ 
+ // TODO change to Interface type
+global org.eeat.drools.rbs.Drools parent;
+global org.knime.core.node.BufferedDataTable knimeInputData;
+global org.knime.core.node.BufferedDataTable knimeOutputData;
+
+// Query
+query "Knime results"
+  out : KnimeOutput()
+end
+
+// Rules
+rule "Default data transformation"
+  salience -100
+  no-loop
+  when
+    $i : KnimeInput()
+  then
+    KnimeOutput no = new KnimeOutput();
+    no.setColumn1($i.getColumn1() +1);
+    no.setColumn2($i.getColumn2() + "zzz");
+    no.setColumn3($i.getColumn3() + 10);
+    no.setColumn4($i.getColumn4() + "zzz");
+    insert(no);
+end
+
+rule "Output data"
+  no-loop
+  when
+    $i : KnimeOutput()
+  then
+   parent.getLog().debug(String.format("KNIME output: %s",$i));   
+end
+
+rule "Input data"
+  no-loop
+  when
+    $i : KnimeInput()
+  then
+   parent.getLog().debug(String.format("KNIME input: %s",$i));   
+end
+
+rule "Test this file loading"
+  no-loop
+  when
+	eval (true)
+  then  	
+  	parent.getLog().debug("Property file loaded successfully.");
+end
+

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM 'http://logging.apache.org/log4j/1.2/log4j.dtd'>
+
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/' debug="false">
+   
+  <appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+      	<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{HH:mm:ss} %-5p %-10c{1}: %m\n" />
+		</layout>
+   </appender>
+   
+  <!--  Use this for debugging, because it provides method location information -->
+  <appender name="DebugConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+      	<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{HH:mm:ss} %-5p %-10c{2} %l: %m\n" />
+		</layout>
+   </appender>   
+   
+   	<!-- XML (CBE) events to file -->
+	<appender name="FileAppender"
+		class="org.apache.log4j.FileAppender">
+		<param name="File" value="log4j.log" />
+		<param name="Append" value="false" />
+		<layout class="org.apache.log4j.xml.XMLLayout" />
+	</appender>
+   
+ 
+<!--
+	By referring to the names of the loggers (which are class packages), we can modify logging level.
+	 additivity is true by default, meaning it applied to all loggers in the package. 
+	 When false, the specification only refers to the specified logger.
+-->  	
+
+	<!-- 
+	<logger name="org.eeat.repository.drools" additivity="true">
+    	<level value="INFO"/>
+	</logger>
+
+	<logger name="org.eeat.repository.feed" additivity="true">
+    	<level value="INFO"/>
+	</logger>
+	 -->
+	 
+	<logger name="org.eeat">
+    	<level value="ALL"/>
+	</logger>
+		
+	<logger name="class org.eeat">
+    	<level value="ALL"/>
+	</logger>
+	
+	<logger name="org.apache">
+    	<level value="WARN"/>
+	</logger>	
+	   
+   <root>
+      <level value="ALL"/>
+ 	  <appender-ref ref="ConsoleAppender"/>
+   </root>
+</log4j:configuration>

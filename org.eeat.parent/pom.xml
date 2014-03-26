@@ -35,30 +35,15 @@
 
 	<modules>
 		<!-- shared utilities -->
-		<!-- <module>../org.apache.log4j</module> <module>../org.apache.log4j.component</module> 
-			<module>../org.apache.log4j.extras</module> <module>../org.apache.log4j.receivers</module> -->
 		<module>../org.eeat.logging.api</module>
 
 		<!-- server -->
 		<module>../org.eeat.core</module>
-		<!-- <module>../org.eeat.emof.ltl</module> -->
 		<module>../org.eeat.log4jproperties</module>
 		<module>../org.eeat.repository.drools</module>
-		<module>../org.eeat.repository.feed.log4j</module>
 		
 		<module>../org.eeat.drools.rbs</module>
 
-		<!-- outdated modules <module>../org.eeat.core</module> <module>../org.eeat.jess</module> 
-			<module>../org.eeat.jess.licensed</module> <module>../org.eeat.repository.jess</module> 
-			<module>../org.eeat.repository.jess.core</module> <module>../org.eeat.repository.jess.hibernate</module> 
-			<module>../org.eeat.repository.jess.ltl</module> <module>../org.eeat.repository.jess.quartz</module> 
-			<module>../org.eeat.repository.jess.sql</module> -->
-
-		<!-- clients -->
-		<module>../org.eeat.emf.ocl.compiler</module>
-		<module>../org.eeat.ocl.compiler.ui</module>
-		<module>../org.eeat.repository.ui</module>
-		<module>../org.eeat.ide.feature</module>
 		
 		<!--  KNIME -->
 		<!-- <module>../org.eeat.knime.google.bigquery.node</module> -->
@@ -78,31 +63,14 @@
 		<module>../org.eeat.knime.git.prprinter</module>
 
 
-
-		<!-- samples -->
-		<module>../org.eeat.samples.protocol.order.plugin</module>
-		<module>../org.eeat.samples.protocol.order</module>
-		<module>../org.eeat.samples.github</module>
-		
-
-
 		<!-- feature -->
-		<!-- <module>../org.eeat.core.feature</module> <module>../org.eeat.repository.feature</module> -->
 		<module>../org.eeat.repository.drools.feature</module>
-		<module>../org.eeat.repository.feed.log4j.feature</module>
-		<module>../org.eeat.ocl.compiler.feature</module>
 
 		<!-- KNIME feature -->
 		<module>../org.eeat.knime.hmm.feature</module>
 		<module>../org.eeat.knime.decisiontree.feature</module>
 		<module>../org.eeat.knime.connector.feature</module>
-		<module>../org.eeat.knime.drools.feature</module>
-		
-		
-		<!-- outdated feature <module>../org.eeat.repository.db.feature</module> 
-			<module>../org.eeat.repository.ltl.feature</module> -->
-
-		<!-- tests <module>../org.eeat.repository.drools.test</module> -->
+		<module>../org.eeat.knime.drools.feature</module>		
 
 		<!-- site -->
 		<module>../org.eeat.updatesite</module>		
