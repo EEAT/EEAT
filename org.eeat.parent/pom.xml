@@ -38,7 +38,6 @@
 		<module>../org.eeat.logging.api</module>
 		
 		<module>../org.eeat.logback</module>
-		<module>../org.eeat.log.properties</module>
 		<module>../org.eeat.core</module>
 
 		<!-- server -->		
