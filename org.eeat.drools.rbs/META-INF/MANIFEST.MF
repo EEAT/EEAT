@@ -5,8 +5,8 @@ Bundle-SymbolicName: org.eeat.drools.rbs;singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-ClassPath: ./,
- .,
+Bundle-ClassPath: .,
+ ./,
  target/classes/,
  target/dependency/slf4j-osgi-1.6.6.jar,
  target/dependency/antlr-3.3.jar,
@@ -32,10 +32,9 @@ Bundle-ClassPath: ./,
  target/dependency/protobuf-java-2.4.1.jar,
  target/dependency/stringtemplate-3.2.jar
 Import-Package: org.osgi.framework;version="1.6.0",
- org.osgi.service.log;version="1.3.0",
- org.slf4j;version="1.7.2",
- org.slf4j.helpers
+ org.osgi.service.log;version="1.3.0"
 Require-Bundle: org.eeat.core;bundle-version="3.0.0",
+ org.eeat.logback;bundle-version="3.0.0",
  org.knime.core;bundle-version="2.8.1"
 Export-Package: org.drools,
  org.drools.agent,

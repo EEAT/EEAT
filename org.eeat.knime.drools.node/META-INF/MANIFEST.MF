@@ -5,19 +5,18 @@ Bundle-SymbolicName: org.eeat.knime.drools.node; singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Bundle-Activator: org.eeat.knime.drools.node.DroolsNodePlugin
 Bundle-Vendor: wrobinson.cis.gsu.edu
-Require-Bundle: org.eclipse.core.runtime;bundle-version="3.7.0",
- org.knime.workbench.core;bundle-version="2.8.0",
- org.knime.workbench.repository;bundle-version="2.8.1",
+Require-Bundle: org.eeat.logback;bundle-version="3.0.0",
  org.eeat.drools.rbs;bundle-version="3.0.0",
- org.knime.base;bundle-version="2.8.1"
+ org.knime.base;bundle-version="2.8.1",
+ org.eclipse.core.runtime;bundle-version="3.7.0",
+ org.knime.workbench.core;bundle-version="2.8.0",
+ org.knime.workbench.repository;bundle-version="2.8.1"
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eeat.knime.drools.node
 Import-Package: org.osgi.framework;version="1.6.0",
- org.osgi.service.log;version="1.3.0",
- org.slf4j;version="1.7.2",
- org.slf4j.helpers;version="1.7.2"
+ org.osgi.service.log;version="1.3.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-ClassPath: ./,
- .,
+Bundle-ClassPath: .,
+ ./,
  target/classes/,
  target/dependency/slf4j-osgi-1.6.6.jar

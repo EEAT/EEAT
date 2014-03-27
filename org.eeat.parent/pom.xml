@@ -36,11 +36,13 @@
 	<modules>
 		<!-- shared utilities -->
 		<module>../org.eeat.logging.api</module>
-
-		<!-- server -->
+		
+		<module>../org.eeat.logback</module>
+		<module>../org.eeat.log.properties</module>
 		<module>../org.eeat.core</module>
-		<module>../org.eeat.drools.rbs</module>
 
+		<!-- server -->		
+		<module>../org.eeat.drools.rbs</module>
 
 		<!-- KNIME -->
 		<module>../org.eeat.knime.drools.node</module>
