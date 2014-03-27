@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Properties
+Bundle-SymbolicName: org.eeat.log.properties;singleton:=true
+Bundle-Version: 3.0.0.qualifier
+Fragment-Host: ch.qos.logback.classic;bundle-version="1.0.0"
+Bundle-ClassPath: ./

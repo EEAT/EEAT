@@ -1,0 +1,31 @@
+<!--  The command line will override the default values below, e.g., 
+	-Dlog.level=ALL -Dlog.others.level=ALL
+	Below are default value. The VM (-D) flags will override the default values.
+-->
+<configuration debug="false">>
+  <logger name="org.eeat" level="${log.level:-INFO}" />
+  
+  <!-- May want to specifically override these, but for now same as others -->
+    <logger name="httpclient" level="${log.others.level:-WARN}" />
+    <logger name="org.apache" level="${log.others.level:-WARN}" />
+    <logger name="org.hibernate" level="${log.others.level:-WARN}" />
+    <logger name="org.quartz" level="${log.others.level:-WARN}" />
+    <logger name="org.osgi" level="${log.others.level:-WARN}" />
+    <logger name="org.eclipse" level="${log.others.level:-WARN}" />
+    <logger name="org.eclipse.osgi" level="${log.others.level:-WARN}" />    
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- encoders are assigned the type
+         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->        
+    <encoder>
+    <!-- 
+      <pattern>%d{HH:mm:ss.SSS} [%.22thread] %20.20logger %-5level : %msg %n</pattern>
+     -->
+      <pattern>%d{HH:mm:ss.SSS} %20.20logger %-5level : %msg %n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="${log.others.level:-WARN}">
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>
