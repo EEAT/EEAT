@@ -38,14 +38,14 @@
 		<module>../org.eeat.logging.api</module>
 
 		<!-- server -->
-		<module>../org.eeat.core</module>	
+		<module>../org.eeat.core</module>
 		<module>../org.eeat.drools.rbs</module>
 
-		
-		<!--  KNIME -->
+
+		<!-- KNIME -->
 		<module>../org.eeat.knime.drools.node</module>
-		
-	
+
+
 	</modules>
 
 	<dependencyManagement>
@@ -142,6 +142,14 @@
 				<artifactId>target-platform-configuration</artifactId>
 				<configuration>
 					<resolver>p2</resolver>
+					<target>
+						<artifact>
+							<groupId>org.eeat</groupId>
+							<artifactId>org.eeat.parent</artifactId>
+							<version>3.0.0-SNAPSHOT</version>
+							<classifier>KNIME</classifier>
+						</artifact>
+					</target>
 					<environments>
 						<environment>
 							<os>linux</os>
