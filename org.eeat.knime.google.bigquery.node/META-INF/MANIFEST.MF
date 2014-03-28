@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: MyBigQuery-Node extension for KNIME Workbench
+Bundle-SymbolicName: org.eeat.knime.google.bigquery.node;singleton:=true
+Bundle-Version: 3.0.0.qualifier
+Bundle-Activator: org.eeat.knime.google.bigquery.node.MyBigQueryNodePlugin
+Bundle-Vendor: 
+Require-Bundle: org.eclipse.core.runtime;bundle-version="3.7.0",
+ org.knime.workbench.core;bundle-version="2.8.0",
+ org.knime.workbench.repository;bundle-version="2.8.1",
+ org.knime.base;bundle-version="2.8.1"
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: target/classes/,
+ target/dependency/commons-codec-1.3.jar,
+ target/dependency/commons-logging-1.1.1.jar,
+ target/dependency/google-api-client-1.12.0-beta.jar,
+ target/dependency/google-api-services-bigquery-v2-rev33-1.8.0-beta-beta.jar,
+ target/dependency/google-http-client-1.12.0-beta.jar,
+ target/dependency/google-http-client-jackson-1.12.0-beta.jar,
+ target/dependency/google-oauth-client-1.12.0-beta.jar,
+ target/dependency/guava-jdk5-13.0.jar,
+ target/dependency/httpclient-4.0.3.jar,
+ target/dependency/httpcore-4.0.1.jar,
+ target/dependency/jackson-core-asl-1.9.9.jar,
+ target/dependency/jsr305-1.3.9.jar,
+ target/dependency/xpp3-1.1.4c.jar
+Export-Package: org.eeat.knime.google.bigquery.node
+

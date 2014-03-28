@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description url="http://eeat.cis.gsu.edu:8080/site">
+      EEAT Integration for Eclipse
+   </description>
+   <feature url="features/org.eeat.knime.hmm.feature_3.0.0.qualifier.jar" id="org.eeat.knime.hmm.feature" version="3.0.0.qualifier">
+      <category name="KNIME_HMM"/>
+   </feature>
+   <feature url="features/org.eeat.knime.connector.feature_3.0.0.qualifier.jar" id="org.eeat.knime.connector.feature" version="3.0.0.qualifier">
+      <category name="KNIME_Connector"/>
+   </feature>
+   <feature url="features/org.eeat.knime.decisiontree.feature_3.0.0.qualifier.jar" id="org.eeat.knime.decisiontree.feature" version="3.0.0.qualifier">
+      <category name="KNIME_DT"/>
+   </feature>
+   <feature url="features/org.eeat.knime.drools.feature_3.0.0.qualifier.jar" id="org.eeat.knime.drools.feature" version="3.0.0.qualifier">
+      <category name="KNIME_Drools"/>
+   </feature>
+   <category-def name="plugins" label="plugins">
+      <description>
+         Pluigns, mostly for the server.
+      </description>
+   </category-def>
+   <category-def name="compilers" label="compilers">
+      <description>
+         Compilers that preprocess files to be read by the server.
+      </description>
+   </category-def>
+   <category-def name="samples" label="samples"/>
+   <category-def name="server" label="server">
+      <description>
+         Processes a stream of events according to the loaded rules.
+      </description>
+   </category-def>
+   <category-def name="UI" label="UI"/>
+   <category-def name="KNIME_HMM" label="KNIME HMM"/>
+   <category-def name="KNIME_DT" label="KNIME Decision Tree"/>
+   <category-def name="KNIME_Connector" label="KNIME Connector"/>
+   <category-def name="KNIME_Drools" label="KNIME_Drools"/>
+</site>

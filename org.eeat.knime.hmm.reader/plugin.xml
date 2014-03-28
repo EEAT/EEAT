@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+   
+   <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            category-path="/EEAT/HMM"
+            factory-class="org.eeat.knime.hmm.reader.onerow3_50.HMMReader_3_50_OneRowNodeFactory"
+            id="edu.gsu.cis.hmm.reader.onerow3_50.HMMReader_3_50_OneRowNodeFactory"/>
+   </extension>
+   
+</plugin>

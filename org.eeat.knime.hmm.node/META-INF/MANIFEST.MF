@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: HMMNode_3_50-Node extension for KNIME Workbench
+Bundle-SymbolicName: org.eeat.knime.hmm.node;singleton:=true
+Bundle-Version: 3.0.0.qualifier
+Bundle-ClassPath: .,
+ target/classes/,
+ target/dependency/jahmm-0.6.2.jar
+Bundle-Activator: org.eeat.knime.hmm.node.so3_50.HMMNode_3_50NodePlugin
+Bundle-Vendor: Arash
+Require-Bundle: org.eclipse.core.runtime,
+ org.knime.workbench.core;bundle-version="2.8.0",
+ org.knime.workbench.repository;bundle-version="2.8.1",
+ org.knime.base;bundle-version="2.8.1"
+Bundle-ActivationPolicy: lazy
+Export-Package: org.eeat.knime.hmm.node.so3_50
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+

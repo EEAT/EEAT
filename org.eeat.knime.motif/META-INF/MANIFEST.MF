@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: MaxMotif-Node extension for KNIME Workbench
+Bundle-SymbolicName: org.eeat.knime.motif; singleton:=true
+Bundle-Version: 3.0.0.qualifier
+Bundle-Activator: org.eeat.knime.motif.MaxMotifNodePlugin
+Bundle-Vendor: EEAT
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.core.runtime,
+ org.knime.workbench.core;bundle-version="2.8.0",
+ org.knime.workbench.repository;bundle-version="2.8.1",
+ org.knime.base;bundle-version="2.8.1"
+Export-Package: org.eeat.knime.motif
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: target/classes/,
+ .
+

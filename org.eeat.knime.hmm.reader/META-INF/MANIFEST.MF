@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: HMMReader_3_50_OneRow-Node extension for KNIME Workbench
+Bundle-SymbolicName: org.eeat.knime.hmm.reader;singleton:=true
+Bundle-Version: 3.0.0.qualifier
+Bundle-Activator: org.eeat.knime.hmm.reader.onerow3_50.HMMReader_3_50_OneRowNodePlugin
+Bundle-Vendor: Arash
+Require-Bundle: org.eclipse.core.runtime,
+ org.knime.workbench.core;bundle-version="2.8.0",
+ org.knime.workbench.repository;bundle-version="2.8.1",
+ org.knime.base;bundle-version="2.8.1"
+Bundle-ActivationPolicy: lazy
+Export-Package: org.eeat.knime.hmm.reader.onerow3_50
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath:  .,
+ target/classes/,
+ target/dependency/jahmm-0.6.2.jar
+

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+   
+   <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            category-path="/EEAT/HMM"
+            factory-class="org.eeat.knime.hmm.pointfinder.learning.HMMLearningPointFinderNodeFactory"
+            id="org.eeat.knime.hmm.learning.finder.HMMLearningPointFinderNodeFactory"/>
+   </extension>
+   
+</plugin>

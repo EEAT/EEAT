@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+  <extension
+         point="org.knime.workbench.repository.categories">
+      <category
+            description="HMM"
+            level-id="HMM"
+            name="HMM"
+            path="/EEAT">
+      </category>
+   </extension>
+   
+   <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            category-path="/EEAT/HMM"
+            factory-class="org.eeat.knime.hmm.node.so3_50.HMMNode_3_50NodeFactory"
+            id="edu.gsu.hmm.so3_50.HMMNode_3_50NodeFactory"/>
+   </extension>
+   
+</plugin>

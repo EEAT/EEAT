@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eeat.repository.drools">
-   <implementation class="org.eeat.repository.drools.RepositoryComponent"/>
-   <reference bind="addPlugin" cardinality="0..n" interface="org.eeat.plugin.IAnalysisComponent" name="IAnalysisComponent" policy="dynamic" unbind="removePlugin"/>
-</scr:component>

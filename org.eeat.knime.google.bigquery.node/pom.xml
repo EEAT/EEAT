@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.eeat</groupId>
+		<artifactId>org.eeat.parent</artifactId>
+		<version>3.0.0-SNAPSHOT</version>
+		<relativePath>../org.eeat.parent/pom.xml
+		</relativePath>
+	</parent>
+	<artifactId>org.eeat.knime.google.bigquery.node</artifactId>
+	<description>EEAT Google BigQuery KNIME operator node</description>
+	<packaging>eclipse-plugin</packaging>
+	<version>3.0.0-SNAPSHOT</version>
+	<dependencies>
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>1.12.0-beta</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.http-client</groupId>
+			<artifactId>google-http-client-jackson</artifactId>
+			<version>1.12.0-beta</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-bigquery</artifactId>
+			<version>v2-rev33-1.8.0-beta</version>
+			<classifier>beta</classifier>
+		</dependency>
+		<!--
+		 target/dependency/javax.transaction-1.1.1.v201105210645.jar, 
+		 -->
+	</dependencies>
+</project>

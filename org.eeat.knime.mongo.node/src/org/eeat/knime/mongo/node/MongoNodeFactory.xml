@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./default.png" type="Manipulator">
+    <name>Mongo Database</name>
+    
+    <shortDescription>
+        Mongo Database: simple database (table) connector.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>Mongo Database</intro>
+        
+        
+        <option name="Mongo DB name">Name of the mongo database</option>
+        <option name="Collection">Name of the collection to query</option>
+        <option name="Mongo collection conditions">A list of conditions that are parsed and included in the query. The list is of this form:
+        <pre>
+	query:: cond ; cond ; ...
+	cond::  att , value || att , op , value
+        </pre>
+        It is a semicolon separated list. Each condition is either an attribute and value or attribute, operator, value. For example:
+        <pre>
+	name,Joe;ID,10;zipcode,$gt,10010
+        </pre>
+        Note that an attribute (att) can specify subdocuments. For example, if profile has a subdocument with login, then you can specify the login value as:
+        <pre>
+    profile.login,$regex,.*Joe.*
+        </pre>
+        This shows that the regular expression operator can applied in the att,op,value specification.  
+        <ul>
+        <li>It will parse numbers as Integer or float and others as String.</li>
+        <li>It will process comparison operators.</li>
+        <li>It considers  $regex as a comparison operator, which is implemented.</li>
+        </ul>
+        See <a href="http://docs.mongodb.org/manual/reference/operator/query">Mongo Manual</a>       
+        <br><b>Operators</b></br>
+        
+        <pre>
+$gt Matches values that are greater than the value specified in the query. 
+$gte Matches values that are equal to or greater than the value specified in the query. 
+$in Matches any of the values that exist in an array specified in the query. 
+$lt Matches values that are less than the value specified in the query. 
+$lte Matches values that are less than or equal to the value specified in the query. 
+$ne Matches all values that are not equal to the value specified in the query. 
+$nin Matches values that do not exist in an array specified to the query.   
+$regex Selects documents where values match a specified regular expression.      
+        </pre>   
+	</option>
+        <option name="Mongo AND query">If true, than all the query conditions will be joined as an (and) conjunction; otherwise, they will be joined as a disjunction (or).</option>
+        <option name="Mongo query limit">Limit on the number of results returned. Specify a very large number if you want all results.</option>
+        
+        
+        The mongodb driver by unity seems to be appropriate. However, it only returns 100 rows and also it always timesout, when connecting via ssh.
+
+    </fullDescription>
+    
+    <ports>
+        <outPort index="0" name="Out-Port name">The table resulting from the query.</outPort>
+        <!-- possibly more output ports here-->
+    </ports>    
+    <views>
+        <view index="0" name="name of first view">No views.</view>
+        <!--view index="1" name="name of second view">Description of second view...</view-->
+    </views>
+</knimeNode>

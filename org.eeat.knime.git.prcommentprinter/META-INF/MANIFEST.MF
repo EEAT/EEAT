@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: PRCommentPrinter-Node extension for KNIME Workbench
+Bundle-SymbolicName: org.eeat.knime.git.prcommentprinter;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: .,
+ target/dependency/gson-2.2.4.jar,
+ target/dependency/org.eclipse.egit.github.core-2.1.5.jar,
+ target/classes/
+Bundle-Activator: org.eeat.knime.git.prcommentprinter.PRCommentPrinterNodePlugin
+Bundle-Vendor: 
+Require-Bundle: org.eclipse.core.runtime;bundle-version="3.7.0",
+ org.knime.workbench.core;bundle-version="2.8.0",
+ org.knime.workbench.repository;bundle-version="2.8.1",
+ org.knime.base;bundle-version="2.8.1"
+Bundle-ActivationPolicy: lazy
+Export-Package: org.eeat.knime.git.prcommentprinter
