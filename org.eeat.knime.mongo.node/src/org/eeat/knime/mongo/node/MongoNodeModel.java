@@ -62,9 +62,9 @@ public class MongoNodeModel extends NodeModel {
 	static final String CFG_MONGO_QUERY_AND = "queryAnd";
 	static protected final SettingsModelBoolean queryAnd = new SettingsModelBoolean(
 			CFG_MONGO_QUERY_AND, true);
-	static final String CFG_MONGO_READONLY = "readOnly";
-	static protected final SettingsModelBoolean readOnly = new SettingsModelBoolean(
-			CFG_MONGO_READONLY, true);
+	static final String CFG_MONGO_SECONDARY = "secondary";
+	static protected final SettingsModelBoolean secondaryPreferred = new SettingsModelBoolean(
+			CFG_MONGO_SECONDARY, true);
 
 	
 
@@ -113,9 +113,13 @@ public class MongoNodeModel extends NodeModel {
 
 	void connectToDB(String databaseName) {
 		logger.info("Connecting to mongo database: " + databaseName);
-		db = mongoClient.getDB(databaseName);
-		if (readOnly.getBooleanValue()) {
-			db.setReadPreference(ReadPreference.primary());
+		db = mongoClient.getDB(databaseName);		
+		if (secondaryPreferred.getBooleanValue()) {
+			db.setReadPreference(ReadPreference.secondaryPreferred());
+			logger.info("Secondary preferred on database: " + databaseName);
+		}
+		else {
+			db.setReadPreference(ReadPreference.primaryPreferred());
 		}
 	}
 		
@@ -356,7 +360,7 @@ public class MongoNodeModel extends NodeModel {
 		mongoColl.saveSettingsTo(settings);
 		mongoLimit.saveSettingsTo(settings);
 		queryAnd.saveSettingsTo(settings);
-		readOnly.saveSettingsTo(settings);
+		secondaryPreferred.saveSettingsTo(settings);
 
 	}
 
@@ -376,7 +380,7 @@ public class MongoNodeModel extends NodeModel {
 		mongoColl.loadSettingsFrom(settings);
 		mongoLimit.loadSettingsFrom(settings);
 		queryAnd.loadSettingsFrom(settings);
-		readOnly.loadSettingsFrom(settings);
+		secondaryPreferred.loadSettingsFrom(settings);
 
 
 	}
@@ -397,7 +401,7 @@ public class MongoNodeModel extends NodeModel {
 		mongoColl.validateSettings(settings);
 		mongoLimit.validateSettings(settings);
 		queryAnd.validateSettings(settings);
-		readOnly.validateSettings(settings);
+		secondaryPreferred.validateSettings(settings);
 
 	}
 
