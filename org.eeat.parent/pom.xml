@@ -163,6 +163,7 @@
 				<artifactId>target-platform-configuration</artifactId>
 				<configuration>
 					<resolver>p2</resolver>
+<!-- Target doesn't seem to be helpful in maven (but is useful to compile within Eclipse)			
 					<target>
 						<artifact>
 							<groupId>org.eeat</groupId>
@@ -171,6 +172,7 @@
 							<classifier>KNIME</classifier>
 						</artifact>
 					</target>
+ -->					
 					<environments>
 						<environment>
 							<os>linux</os>

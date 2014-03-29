@@ -35,6 +35,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.ReadPreference;
 
 /**
  * This is the model implementation of BigQuery. Node for reading from bigquery
@@ -61,7 +62,11 @@ public class MongoNodeModel extends NodeModel {
 	static final String CFG_MONGO_QUERY_AND = "queryAnd";
 	static protected final SettingsModelBoolean queryAnd = new SettingsModelBoolean(
 			CFG_MONGO_QUERY_AND, true);
+	static final String CFG_MONGO_READONLY = "readOnly";
+	static protected final SettingsModelBoolean readOnly = new SettingsModelBoolean(
+			CFG_MONGO_READONLY, true);
 
+	
 
 	/**
 	 * the settings key which is used to retrieve and store the settings (from the dialog or from a
@@ -109,6 +114,9 @@ public class MongoNodeModel extends NodeModel {
 	void connectToDB(String databaseName) {
 		logger.info("Connecting to mongo database: " + databaseName);
 		db = mongoClient.getDB(databaseName);
+		if (readOnly.getBooleanValue()) {
+			db.setReadPreference(ReadPreference.primary());
+		}
 	}
 		
 	BasicDBObject createRegExBasicObject(String v1, String v2) {
@@ -348,6 +356,7 @@ public class MongoNodeModel extends NodeModel {
 		mongoColl.saveSettingsTo(settings);
 		mongoLimit.saveSettingsTo(settings);
 		queryAnd.saveSettingsTo(settings);
+		readOnly.saveSettingsTo(settings);
 
 	}
 
@@ -367,6 +376,7 @@ public class MongoNodeModel extends NodeModel {
 		mongoColl.loadSettingsFrom(settings);
 		mongoLimit.loadSettingsFrom(settings);
 		queryAnd.loadSettingsFrom(settings);
+		readOnly.loadSettingsFrom(settings);
 
 
 	}
@@ -387,6 +397,7 @@ public class MongoNodeModel extends NodeModel {
 		mongoColl.validateSettings(settings);
 		mongoLimit.validateSettings(settings);
 		queryAnd.validateSettings(settings);
+		readOnly.validateSettings(settings);
 
 	}
 
