@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="KNIME-2.9" sequenceNumber="6">
+<?pde version="3.8"?><target name="KNIME-2.9" sequenceNumber="8">
 <locations>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.sdk.ide" version="3.7.2.M20120208-0800"/>
+<unit id="org.eclipse.platform.ide" version="3.7.2.M20120208-0800"/>
+<unit id="org.eclipse.platform.sdk" version="3.7.2.M20120208-0800"/>
+<repository location="http://download.eclipse.org/eclipse/updates/3.7"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="ch.qos.logback.feature.feature.group" version="1.0.7"/>
+<unit id="org.slf4j.feature.feature.group" version="1.6.6"/>
+<repository location="http://logback.qos.ch/p2/"/>
+</location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.knime.features.ext.jython.feature.group" version="2.9.1.0041076"/>
 <unit id="org.knime.features.ext.poi.feature.group" version="2.9.2.0041424"/>
@@ -50,15 +61,9 @@
 <repository location="http://www.knime.org/update/2.9/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.sdk.ide" version="3.7.2.M20120208-0800"/>
-<unit id="org.eclipse.platform.ide" version="3.7.2.M20120208-0800"/>
-<unit id="org.eclipse.platform.sdk" version="3.7.2.M20120208-0800"/>
-<repository location="http://download.eclipse.org/eclipse/updates/3.7"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="ch.qos.logback.feature.feature.group" version="1.0.7"/>
-<unit id="org.slf4j.feature.feature.group" version="1.6.6"/>
-<repository location="http://logback.qos.ch/p2/"/>
+<unit id="de.mpicbg.tds.knime.scripting.python.feature.feature.group" version="1.1.0.201312051236"/>
+<unit id="de.mpicbg.tds.knime.scripting.r.feature.feature.group" version="1.1.0.201312051236"/>
+<repository location="http://tech.knime.org/update/community-contributions/trusted/2.9/"/>
 </location>
 </locations>
 </target>
