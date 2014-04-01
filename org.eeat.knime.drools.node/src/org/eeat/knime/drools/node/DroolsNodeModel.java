@@ -65,7 +65,7 @@ public class DroolsNodeModel extends NodeModel {
 	public final String KNIME_ROW_OUT = "KnimeOutput";
 	public final String KNIME_QUERRY =  "Knime results";
 	static final String CFG_INCREMENTAL = "incremental";
-	static protected final SettingsModelBoolean incremental = new SettingsModelBoolean(
+	protected final SettingsModelBoolean incremental = new SettingsModelBoolean(
 			CFG_INCREMENTAL, true);
 	
 	
@@ -74,10 +74,10 @@ public class DroolsNodeModel extends NodeModel {
             .getLogger(DroolsNodeModel.class);
         
     
-	static protected final SettingsModelString userFileSetting = new SettingsModelString(
+	protected final SettingsModelString userFileSetting = new SettingsModelString(
 			CFG_USER_FILE_NAME, null);
 
-    static public SettingsModelString getUserFileSetting() {
+    public SettingsModelString getUserFileSetting() {
 		return userFileSetting;
 	}
 
