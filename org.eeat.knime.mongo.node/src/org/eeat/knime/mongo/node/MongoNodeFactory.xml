@@ -8,8 +8,9 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>Mongo Database</intro>
-        
+        <intro>
+        Mongo Database    
+        </intro>
         
         <option name="Mongo DB name">Name of the mongo database</option>
         <option name="Collection">Name of the collection to query</option>
@@ -32,8 +33,10 @@
         <li>It will process comparison operators.</li>
         <li>It considers  $regex as a comparison operator, which is implemented.</li>
         </ul>
-        See <a href="http://docs.mongodb.org/manual/reference/operator/query">Mongo Manual</a>       
-        <br><b>Operators</b></br>
+        See <a href="http://docs.mongodb.org/manual/reference/operator/query">Mongo Manual</a>
+
+		<p></p>
+        <b>Operators</b>
         
         <pre>
 $gt Matches values that are greater than the value specified in the query. 
@@ -52,6 +55,7 @@ $regex Selects documents where values match a specified regular expression.
         
         The mongodb driver by unity seems to be appropriate. However, it only returns 100 rows and also it always timesout, when connecting via ssh.
 
+	
     </fullDescription>
     
     <ports>
