@@ -1,44 +1,62 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
-<knimeNode icon="./default.png" type="Manipulator">
-    <name>Mongo Database</name>
-    
-    <shortDescription>
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source"  xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+
+	<name>Mongo Database</name>
+
+	<shortDescription>
         Mongo Database: simple database (table) connector.
     </shortDescription>
-    
-    <fullDescription>
-        <intro>
-        Mongo Database    
-        </intro>
-        
-        <option name="Mongo DB name">Name of the mongo database</option>
-        <option name="Collection">Name of the collection to query</option>
-        <option name="Mongo collection conditions">A list of conditions that are parsed and included in the query. The list is of this form:
-        <pre>
+
+	<fullDescription>
+		<intro>
+			Mongo Database
+		</intro>
+
+		<option name="DB name">Name of the mongo database</option>
+		<option name="Collection">Name of the collection to query</option>
+		<option name="Collection conditions">
+			A list of conditions that are parsed and included in the query.
+			<p>
+				The list is of this form:
+			</p>
+			<pre>
 	query:: cond ; cond ; ...
 	cond::  att , value || att , op , value
         </pre>
-        It is a semicolon separated list. Each condition is either an attribute and value or attribute, operator, value. For example:
-        <pre>
+			<p>
+				It is a semicolon separated list. Each condition is either an
+				attribute and value or attribute, operator, value. For example:
+			</p>
+			<pre>
 	name,Joe;ID,10;zipcode,$gt,10010
         </pre>
-        Note that an attribute (att) can specify subdocuments. For example, if profile has a subdocument with login, then you can specify the login value as:
-        <pre>
+			<p>
+				Note that an attribute (att) can specify subdocuments. For example, if
+				profile has a subdocument with login, then you can specify the login
+				value as:
+			</p>
+			<pre>
     profile.login,$regex,.*Joe.*
         </pre>
-        This shows that the regular expression operator can applied in the att,op,value specification.  
-        <ul>
-        <li>It will parse numbers as Integer or float and others as String.</li>
-        <li>It will process comparison operators.</li>
-        <li>It considers  $regex as a comparison operator, which is implemented.</li>
-        </ul>
-        See <a href="http://docs.mongodb.org/manual/reference/operator/query">Mongo Manual</a>
+			<p>
+				This shows that the regular expression operator can applied in the
+				att,op,value specification.
+			</p>
+			<ul>
+				<li>It will parse numbers as Integer or float and others as String.
+				</li>
+				<li>It will process comparison operators.</li>
+				<li>It considers $regex as a comparison operator, which is
+					implemented.</li>
+			</ul>
+			<p>
+				See
+				<a href="http://docs.mongodb.org/manual/reference/operator/query">Mongo Manual</a>
 
-		<p></p>
-        <b>Operators</b>
-        
-        <pre>
+				<b>Operators</b>
+			</p>
+			<pre>
 $gt Matches values that are greater than the value specified in the query. 
 $gte Matches values that are equal to or greater than the value specified in the query. 
 $in Matches any of the values that exist in an array specified in the query. 
@@ -47,23 +65,47 @@ $lte Matches values that are less than or equal to the value specified in the qu
 $ne Matches all values that are not equal to the value specified in the query. 
 $nin Matches values that do not exist in an array specified to the query.   
 $regex Selects documents where values match a specified regular expression.      
-        </pre>   
-	</option>
-        <option name="Mongo AND query">If true, than all the query conditions will be joined as an (and) conjunction; otherwise, they will be joined as a disjunction (or).</option>
-        <option name="Mongo query limit">Limit on the number of results returned. Specify a very large number if you want all results.</option>
-        
-        
-        The mongodb driver by unity seems to be appropriate. However, it only returns 100 rows and also it always timesout, when connecting via ssh.
+        </pre>
+		</option>
+		<option name="AND query">If true, than all the query conditions will be
+			joined as an (and) conjunction; otherwise, they will be joined as a
+			disjunction (or).</option>
+		<option name="Query limit">Limit on the number of results returned. Specify a
+			very large number if you want all results.</option>
 
-	
-    </fullDescription>
-    
-    <ports>
-        <outPort index="0" name="Out-Port name">The table resulting from the query.</outPort>
-        <!-- possibly more output ports here-->
-    </ports>    
-    <views>
-        <view index="0" name="name of first view">No views.</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
+
+		<option name="Batch size">
+			From MongoDB manual: The MongoDB server returns the query results in
+			batches. Batch size will not exceed the maximum BSON document size.
+			For most queries, the first batch returns 101 documents or just
+			enough documents to exceed 1 megabyte. Subsequent batch size is 4
+			megabytes. To override the default size of the batch, see batchSize()
+			and limit().
+		</option>
+		<option name="Incremental">Execute query and output after results after
+			increment size is reached. Used within a loop. Next iteration, will
+			output the next result table, until no more available.
+			<p>
+			When placed within a loop it will			
+			</p>
+			<ul>
+			<li>Run the query once</li>
+			<li>Output a result of size Increment size</li>
+			<li>On next iteration, output next result of size Increment size</li>
+			</ul>
+			<p>
+			This efficiently provides results of the query in a series of tables of Increment size
+			</p>
+		</option>
+		<option name="Increment size">The number of rows in the table provided, when
+			Incremental option is true.</option>
+
+
+	</fullDescription>
+
+	<ports>
+		<outPort index="0" name="Out-Port name">The table resulting from the query.
+		</outPort>
+		<!-- possibly more output ports here -->
+	</ports>
 </knimeNode>

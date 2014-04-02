@@ -44,7 +44,6 @@ import com.mongodb.ReadPreference;
  */
 public class MongoNodeModel extends NodeModel {
 
-	// the logger instance
 	private static final NodeLogger logger = NodeLogger.getLogger(MongoNodeModel.class);
 
 	static final String CFG_USER_QUERY = "userQuery";
@@ -62,32 +61,36 @@ public class MongoNodeModel extends NodeModel {
 	static final String CFG_MONGO_SECONDARY = "secondary";
 	protected final SettingsModelBoolean secondaryPreferred = new SettingsModelBoolean(CFG_MONGO_SECONDARY,
 			true);
-	
+
+	static final String CFG_MONGO_INCREMENTAL = "incrementalOutput";
+	protected final SettingsModelBoolean mongoIncremental = new SettingsModelBoolean(CFG_MONGO_INCREMENTAL,
+			true);
+	static final String CFG_MONGO_INCREMENT_SIZE = "incrementSize";
+	protected final SettingsModelInteger mongoIncrementSize = new SettingsModelInteger(
+			CFG_MONGO_INCREMENT_SIZE, 100);
+
 	final String MONGO_DB_HOST = "localhost";
-
-	/**
-	 * the settings key which is used to retrieve and store the settings (from the dialog or from a
-	 * settings file) (package visibility to be usable from the dialog).
-	 */
-	static final String CFGKEY_COUNT = "Count";
-
-	/** initial default count value. */
-	static final int DEFAULT_COUNT = 100;
 
 	MongoClient mongoClient = null;
 	DB db = null;
-
-	String dbName = "github";
-	String collectionName = "users";
-	String conditions = "";
-	int queryLimit = 0;
-	int batch = 100;
+	int rowNumber = 0;
+	DBCursor cursor = null;
+	DataTableSpec outputSpec;
+	boolean firstExecuteQuery = true;
 
 	/**
 	 * Constructor for the node model.
 	 */
 	protected MongoNodeModel() {
 		super(0, 1);
+	}
+
+	private void initVars() {
+		mongoClient = null;
+		db = null;
+		rowNumber = 0;
+		cursor = null;
+		outputSpec = null;
 	}
 
 	/**
@@ -105,14 +108,16 @@ public class MongoNodeModel extends NodeModel {
 		return new DataTableSpec[] { null };
 	}
 
-	void connectToDB(final String databaseName) {
-		logger.info("Connecting to mongo database: " + databaseName);
-		db = mongoClient.getDB(databaseName);
-		if (secondaryPreferred.getBooleanValue()) {
-			db.setReadPreference(ReadPreference.secondaryPreferred());
-			logger.info("Secondary preferred on database: " + databaseName);
-		} else {
-			db.setReadPreference(ReadPreference.primaryPreferred());
+	void establishDBConnection(final String databaseName) {
+		if (db == null) {
+			logger.info("Connecting to mongo database: " + databaseName);
+			db = mongoClient.getDB(databaseName);
+			if (secondaryPreferred.getBooleanValue()) {
+				db.setReadPreference(ReadPreference.secondaryPreferred());
+				logger.info("Secondary preferred on database: " + databaseName);
+			} else {
+				db.setReadPreference(ReadPreference.primaryPreferred());
+			}
 		}
 	}
 
@@ -133,26 +138,45 @@ public class MongoNodeModel extends NodeModel {
 		return result;
 	}
 
-	void createMongoClient() {
-		logger.info("Opening mongo client.");
-		if (mongoBatch.getIntValue() > 0) {
-			batch = mongoBatch.getIntValue();
-		}
-		MongoClientOptions options = MongoClientOptions.builder()
-                .connectionsPerHost(batch)
-                .autoConnectRetry(true)
-                .build();
-		try {
-			mongoClient = new MongoClient(MONGO_DB_HOST,options);
-		} catch (final Exception e) {
-			logger.info("Cannot open mongo client.");
-			logger.info(e.toString());
+	void establishMongoClient() {
+		if (mongoClient == null) {
+			logger.info("Opening mongo client.");
+			final MongoClientOptions options = MongoClientOptions.builder()
+					.connectionsPerHost(mongoBatch.getIntValue()).autoConnectRetry(true).build();
+			try {
+				mongoClient = new MongoClient(MONGO_DB_HOST, options);
+			} catch (final Exception e) {
+				logger.info("Cannot open mongo client.");
+				logger.info(e.toString());
+			}
 		}
 	}
 
 	BasicDBObject createRegExBasicObject(final String v1, final String v2) {
 		final Pattern p = Pattern.compile(v2);
 		return new BasicDBObject(v1, p);
+	}
+	
+	DBCursor updateDBCursor() {
+		if (cursor ==null || !mongoIncremental.getBooleanValue()) {
+			cursor = runQuery();
+		}
+		return cursor;		
+	}
+	
+
+	boolean moreData() {
+		boolean mData;
+		if (firstExecuteQuery || !mongoIncremental.getBooleanValue()) {
+			mData = cursor.hasNext();
+		} else {
+			// If incremental, then stop when reach mongoIncrementSize
+			// Next, execute will restart here. 			
+			// firstExecuteQuery ensure that it will get at least one record 
+			mData = cursor.hasNext() && ((rowNumber % mongoIncrementSize.getIntValue()) != 0);
+		}
+		firstExecuteQuery = false;
+		return mData;
 	}
 
 	/**
@@ -162,36 +186,24 @@ public class MongoNodeModel extends NodeModel {
 	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec)
 			throws Exception {
 		logger.info("Starting mongo execution.");
+		logger.info("query is: " + userQuery.getStringValue() + " on " + mongoColl.getStringValue() + " in "
+				+ mongoDB.getStringValue());
 
-		if (userQuery.getStringValue().length() > 0) {
-			conditions = userQuery.getStringValue();
-		}
-		if (mongoDB.getStringValue().length() > 0) {
-			dbName = mongoDB.getStringValue();
-		}
-		if (mongoColl.getStringValue().length() > 0) {
-			collectionName = mongoColl.getStringValue();
-		}
-		if (mongoLimit.getIntValue() > 0) {
-			queryLimit = mongoLimit.getIntValue();
-		}
-		logger.info("query is: " + conditions + " on " + collectionName + " in " + dbName);
-
-		int i = 0;
+		firstExecuteQuery = true;
 		RowKey key = null;
 		BufferedDataTable out = null;
 		BufferedDataContainer container = null;
-		DBCursor cursor = null;
 		try {
-			// /the main function
-			createMongoClient();
-			connectToDB(dbName);
-			cursor = runQuery();
-			final DataTableSpec outputSpec = specifyDataContainer(cursor.copy());
+			establishMongoClient();
+			establishDBConnection(mongoDB.getStringValue());
+			cursor = updateDBCursor();
+			if (outputSpec == null) {
+				outputSpec = specifyDataContainer(cursor.copy());
+			}
 			if (outputSpec == null) {
 				logger.error("Query results in empty set.");
 				throw new RuntimeException("Query result is empty"); // EARLY
-																	 // EXIT
+																		// EXIT
 			}
 
 			// the execution context will provide us with storage capacity, in this
@@ -200,20 +212,18 @@ public class MongoNodeModel extends NodeModel {
 			// will buffer to disc if necessary.
 			container = exec.createDataContainer(outputSpec);
 
-			while (cursor.hasNext()) {
+			while (moreData()) {
 				final DBObject obj = cursor.next();
-				key = new RowKey(i + "");
-				logger.debug(i + ": " + obj);
+				key = new RowKey(rowNumber + "");
+				logger.debug(rowNumber + ": " + obj);
 				final DataCell[] newcells = new DataCell[outputSpec.getNumColumns()];
 				int j = 0;
 				for (final String k : outputSpec.getColumnNames()) {
 					if (obj.containsField(k)) {
 						newcells[j++] = new StringCell(obj.get(k) != null ? obj.get(k).toString() : "");
 					}
-					// If the new row has more columns than the data spec, then
-					// stop adding columns
-					// Possible because mongo records may not be the same
-					// length.
+					// If the new row has more columns than the data spec, then stop adding columns
+					// Possible because mongo records may not be the same length.
 					if (j >= outputSpec.getNumColumns()) {
 						break;
 					}
@@ -226,19 +236,16 @@ public class MongoNodeModel extends NodeModel {
 
 				// check if the execution monitor was canceled
 				exec.checkCanceled();
-				exec.setProgress(i / (double) cursor.size(), "Adding row " + i);
+				exec.setProgress(rowNumber / (double) cursor.size(), "Adding row " + rowNumber);
 
 				// next
-				i = i + 1;
+				rowNumber = rowNumber + 1;
 			}
 		} catch (final Exception e) {
 			logger.error(e.toString());
 			e.printStackTrace();
 
 		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
 			// once we are done, we close the container and return its table
 			if (container != null) {
 				container.close();
@@ -281,6 +288,8 @@ public class MongoNodeModel extends NodeModel {
 		queryAnd.loadSettingsFrom(settings);
 		secondaryPreferred.loadSettingsFrom(settings);
 		mongoBatch.loadSettingsFrom(settings);
+		mongoIncremental.loadSettingsFrom(settings);
+		mongoIncrementSize.loadSettingsFrom(settings);
 
 	}
 
@@ -337,26 +346,32 @@ public class MongoNodeModel extends NodeModel {
 		// TODO Code executed on reset.
 		// Models build during execute are cleared here.
 		// Also data handled in load/saveInternals will be erased here.
-		mongoClient.close();
+		if (cursor != null) {
+			cursor.close();
+		}
+		if (mongoClient != null) {
+			mongoClient.close();
+		}
+		initVars();
 	}
 
 	DBCursor runQuery() {
 		// Run query
-		logger.info("Accessing mongo collection: " + collectionName);
-		final DBCollection coll = db.getCollection(collectionName);
+		logger.info("Accessing mongo collection: " + mongoColl.getStringValue());
+		final DBCollection coll = db.getCollection(mongoColl.getStringValue());
 		DBCursor cursor;
 		final int batchSize = 100;
-		logger.info("Running mongo query: " + conditions);
-		logger.info("... and query limit: " + queryLimit);
-		if (conditions.length() > 0) {
-			if (queryLimit > 0) {
-				cursor = coll.find(parseQuery(conditions)).limit(queryLimit);
+		logger.info("Running mongo query: " + userQuery.getStringValue());
+		logger.info("... and query limit: " + mongoLimit.getIntValue());
+		if (userQuery.getStringValue().length() > 0) {
+			if (mongoLimit.getIntValue() > 0) {
+				cursor = coll.find(parseQuery(userQuery.getStringValue())).limit(mongoLimit.getIntValue());
 			} else {
-				cursor = coll.find(parseQuery(conditions)).batchSize(batchSize);
+				cursor = coll.find(parseQuery(userQuery.getStringValue())).batchSize(batchSize);
 			}
 		} else {
-			if (queryLimit > 0) {
-				cursor = coll.find().limit(queryLimit);
+			if (mongoLimit.getIntValue() > 0) {
+				cursor = coll.find().limit(mongoLimit.getIntValue());
 			} else {
 				cursor = coll.find().batchSize(batchSize);
 			}
@@ -396,6 +411,8 @@ public class MongoNodeModel extends NodeModel {
 		queryAnd.saveSettingsTo(settings);
 		secondaryPreferred.saveSettingsTo(settings);
 		mongoBatch.saveSettingsTo(settings);
+		mongoIncremental.saveSettingsTo(settings);
+		mongoIncrementSize.saveSettingsTo(settings);
 
 	}
 
@@ -444,6 +461,8 @@ public class MongoNodeModel extends NodeModel {
 		queryAnd.validateSettings(settings);
 		secondaryPreferred.validateSettings(settings);
 		mongoBatch.validateSettings(settings);
+		mongoIncremental.validateSettings(settings);
+		mongoIncrementSize.validateSettings(settings);
 
 	}
 
