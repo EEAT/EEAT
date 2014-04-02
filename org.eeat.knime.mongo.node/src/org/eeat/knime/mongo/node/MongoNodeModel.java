@@ -83,7 +83,7 @@ public class MongoNodeModel extends NodeModel {
 	String dbName = "github";
 	String collectionName = "users";
 	String conditions = "";
-	int queryLimit = 100;
+	int queryLimit = 0;
 
 	/**
 	 * Constructor for the node model.
@@ -352,9 +352,17 @@ public class MongoNodeModel extends NodeModel {
 		logger.info("Running mongo query: " + conditions);
 		logger.info("... and query limit: " + queryLimit);
 		if (conditions.length() > 0) {
-			cursor = coll.find(parseQuery(conditions)).limit(queryLimit);
+			if (queryLimit > 0) {
+				cursor = coll.find(parseQuery(conditions)).limit(queryLimit);
+			} else {
+				cursor = coll.find(parseQuery(conditions));
+			}
 		} else {
-			cursor = coll.find().limit(queryLimit);
+			if (queryLimit > 0) {
+				cursor = coll.find().limit(queryLimit);
+			} else {
+				cursor = coll.find();
+			}
 		}
 		logger.info("Result size: " + cursor.size());
 		return cursor;
