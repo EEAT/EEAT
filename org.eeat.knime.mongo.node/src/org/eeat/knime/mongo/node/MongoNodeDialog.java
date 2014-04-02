@@ -35,6 +35,7 @@ public class MongoNodeDialog extends DefaultNodeSettingsPane {
         addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(MongoNodeModel.CFG_MONGO_QUERY_AND,true),"Mongo AND query"));
         addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(MongoNodeModel.CFG_MONGO_SECONDARY,true),"Mongo secondary preferred"));
         addDialogComponent(new DialogComponentNumber(new SettingsModelInteger(MongoNodeModel.CFG_MONGO_LIMIT, 100), "Mongo query limit",10));
+        addDialogComponent(new DialogComponentNumber(new SettingsModelInteger(MongoNodeModel.CFG_MONGO_BATCH, 100), "Mongo batch size",10));
     }    
     
 }

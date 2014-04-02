@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.def.DefaultRow;
@@ -35,6 +34,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.ReadPreference;
 
 /**
@@ -45,32 +45,29 @@ import com.mongodb.ReadPreference;
 public class MongoNodeModel extends NodeModel {
 
 	// the logger instance
-	private static final NodeLogger logger = NodeLogger
-			.getLogger(MongoNodeModel.class);
+	private static final NodeLogger logger = NodeLogger.getLogger(MongoNodeModel.class);
 
 	static final String CFG_USER_QUERY = "userQuery";
-	protected final SettingsModelString userQuery = new SettingsModelString(
-			CFG_USER_QUERY, null);
+	protected final SettingsModelString userQuery = new SettingsModelString(CFG_USER_QUERY, null);
 	static final String CFG_MONGO_DB = "mongoDB";
-	protected final SettingsModelString mongoDB = new SettingsModelString(
-			CFG_MONGO_DB, null);
+	protected final SettingsModelString mongoDB = new SettingsModelString(CFG_MONGO_DB, null);
 	static final String CFG_MONGO_COLL = "mongoColl";
-	protected final SettingsModelString mongoColl = new SettingsModelString(
-			CFG_MONGO_COLL, null);
+	protected final SettingsModelString mongoColl = new SettingsModelString(CFG_MONGO_COLL, null);
 	static final String CFG_MONGO_LIMIT = "mongoLimit";
-	protected final SettingsModelInteger mongoLimit = new SettingsModelInteger(
-			CFG_MONGO_LIMIT, 100);
+	protected final SettingsModelInteger mongoLimit = new SettingsModelInteger(CFG_MONGO_LIMIT, 0);
+	static final String CFG_MONGO_BATCH = "mongoBatch";
+	protected final SettingsModelInteger mongoBatch = new SettingsModelInteger(CFG_MONGO_LIMIT, 100);
 	static final String CFG_MONGO_QUERY_AND = "queryAnd";
-	protected final SettingsModelBoolean queryAnd = new SettingsModelBoolean(
-			CFG_MONGO_QUERY_AND, true);
+	protected final SettingsModelBoolean queryAnd = new SettingsModelBoolean(CFG_MONGO_QUERY_AND, true);
 	static final String CFG_MONGO_SECONDARY = "secondary";
-	protected final SettingsModelBoolean secondaryPreferred = new SettingsModelBoolean(
-			CFG_MONGO_SECONDARY, true);
+	protected final SettingsModelBoolean secondaryPreferred = new SettingsModelBoolean(CFG_MONGO_SECONDARY,
+			true);
+	
+	final String MONGO_DB_HOST = "localhost";
 
 	/**
-	 * the settings key which is used to retrieve and store the settings (from
-	 * the dialog or from a settings file) (package visibility to be usable from
-	 * the dialog).
+	 * the settings key which is used to retrieve and store the settings (from the dialog or from a
+	 * settings file) (package visibility to be usable from the dialog).
 	 */
 	static final String CFGKEY_COUNT = "Count";
 
@@ -84,6 +81,7 @@ public class MongoNodeModel extends NodeModel {
 	String collectionName = "users";
 	String conditions = "";
 	int queryLimit = 0;
+	int batch = 100;
 
 	/**
 	 * Constructor for the node model.
@@ -96,8 +94,7 @@ public class MongoNodeModel extends NodeModel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
-			throws InvalidSettingsException {
+	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 
 		// TODO: check if user settings are available, fit to the incoming
 		// table structure, and the incoming types are feasible for the node
@@ -138,8 +135,15 @@ public class MongoNodeModel extends NodeModel {
 
 	void createMongoClient() {
 		logger.info("Opening mongo client.");
+		if (mongoBatch.getIntValue() > 0) {
+			batch = mongoBatch.getIntValue();
+		}
+		MongoClientOptions options = MongoClientOptions.builder()
+                .connectionsPerHost(batch)
+                .autoConnectRetry(true)
+                .build();
 		try {
-			mongoClient = new MongoClient();
+			mongoClient = new MongoClient(MONGO_DB_HOST,options);
 		} catch (final Exception e) {
 			logger.info("Cannot open mongo client.");
 			logger.info(e.toString());
@@ -155,8 +159,8 @@ public class MongoNodeModel extends NodeModel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
-			final ExecutionContext exec) throws Exception {
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec)
+			throws Exception {
 		logger.info("Starting mongo execution.");
 
 		if (userQuery.getStringValue().length() > 0) {
@@ -171,8 +175,7 @@ public class MongoNodeModel extends NodeModel {
 		if (mongoLimit.getIntValue() > 0) {
 			queryLimit = mongoLimit.getIntValue();
 		}
-		logger.info("query is: " + conditions + " on " + collectionName
-				+ " in " + dbName);
+		logger.info("query is: " + conditions + " on " + collectionName + " in " + dbName);
 
 		int i = 0;
 		RowKey key = null;
@@ -183,33 +186,29 @@ public class MongoNodeModel extends NodeModel {
 			// /the main function
 			createMongoClient();
 			connectToDB(dbName);
-			final DataTableSpec outputSpec = specifyDataContainer(runQuery());
+			cursor = runQuery();
+			final DataTableSpec outputSpec = specifyDataContainer(cursor.copy());
 			if (outputSpec == null) {
 				logger.error("Query results in empty set.");
 				throw new RuntimeException("Query result is empty"); // EARLY
-																		// EXIT
+																	 // EXIT
 			}
 
-			// the execution context will provide us with storage capacity, in
-			// this
+			// the execution context will provide us with storage capacity, in this
 			// case a data container to which we will add rows sequentially
-			// Note, this container can also handle arbitrary big data tables,
-			// it
+			// Note, this container can also handle arbitrary big data tables, it
 			// will buffer to disc if necessary.
 			container = exec.createDataContainer(outputSpec);
 
-			cursor = runQuery();
 			while (cursor.hasNext()) {
 				final DBObject obj = cursor.next();
 				key = new RowKey(i + "");
 				logger.debug(i + ": " + obj);
-				final DataCell[] newcells = new DataCell[outputSpec
-						.getNumColumns()];
+				final DataCell[] newcells = new DataCell[outputSpec.getNumColumns()];
 				int j = 0;
 				for (final String k : outputSpec.getColumnNames()) {
 					if (obj.containsField(k)) {
-						newcells[j++] = new StringCell(obj.get(k) != null ? obj
-								.get(k).toString() : "");
+						newcells[j++] = new StringCell(obj.get(k) != null ? obj.get(k).toString() : "");
 					}
 					// If the new row has more columns than the data spec, then
 					// stop adding columns
@@ -223,8 +222,7 @@ public class MongoNodeModel extends NodeModel {
 				for (int idx = j; idx < outputSpec.getNumColumns(); idx++) {
 					newcells[idx] = new StringCell("");
 				}
-				final DataRow newrow = new DefaultRow(key, newcells);
-				container.addRowToTable(newrow);
+				container.addRowToTable(new DefaultRow(key, newcells));
 
 				// check if the execution monitor was canceled
 				exec.checkCanceled();
@@ -254,8 +252,7 @@ public class MongoNodeModel extends NodeModel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void loadInternals(final File internDir,
-			final ExecutionMonitor exec) throws IOException,
+	protected void loadInternals(final File internDir, final ExecutionMonitor exec) throws IOException,
 			CanceledExecutionException {
 
 		// TODO load internal data.
@@ -271,8 +268,7 @@ public class MongoNodeModel extends NodeModel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-			throws InvalidSettingsException {
+	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
 
 		// TODO load (valid) settings from the config object.
 		// It can be safely assumed that the settings are valided by the
@@ -284,6 +280,7 @@ public class MongoNodeModel extends NodeModel {
 		mongoLimit.loadSettingsFrom(settings);
 		queryAnd.loadSettingsFrom(settings);
 		secondaryPreferred.loadSettingsFrom(settings);
+		mongoBatch.loadSettingsFrom(settings);
 
 	}
 
@@ -305,8 +302,7 @@ public class MongoNodeModel extends NodeModel {
 				if (atts.get(1).equals("$regex")) {
 					result = createRegExBasicObject(atts.get(0), atts.get(2));
 				} else {
-					result = new BasicDBObject(atts.get(0), createBasicObject(
-							atts.get(1), atts.get(2)));
+					result = new BasicDBObject(atts.get(0), createBasicObject(atts.get(1), atts.get(2)));
 				}
 			} else if (atts.size() == 2) {
 				// Parenthesis TODO: not working
@@ -349,19 +345,20 @@ public class MongoNodeModel extends NodeModel {
 		logger.info("Accessing mongo collection: " + collectionName);
 		final DBCollection coll = db.getCollection(collectionName);
 		DBCursor cursor;
+		final int batchSize = 100;
 		logger.info("Running mongo query: " + conditions);
 		logger.info("... and query limit: " + queryLimit);
 		if (conditions.length() > 0) {
 			if (queryLimit > 0) {
 				cursor = coll.find(parseQuery(conditions)).limit(queryLimit);
 			} else {
-				cursor = coll.find(parseQuery(conditions));
+				cursor = coll.find(parseQuery(conditions)).batchSize(batchSize);
 			}
 		} else {
 			if (queryLimit > 0) {
 				cursor = coll.find().limit(queryLimit);
 			} else {
-				cursor = coll.find();
+				cursor = coll.find().batchSize(batchSize);
 			}
 		}
 		logger.info("Result size: " + cursor.size());
@@ -372,8 +369,7 @@ public class MongoNodeModel extends NodeModel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void saveInternals(final File internDir,
-			final ExecutionMonitor exec) throws IOException,
+	protected void saveInternals(final File internDir, final ExecutionMonitor exec) throws IOException,
 			CanceledExecutionException {
 
 		// TODO save internal models.
@@ -399,6 +395,7 @@ public class MongoNodeModel extends NodeModel {
 		mongoLimit.saveSettingsTo(settings);
 		queryAnd.saveSettingsTo(settings);
 		secondaryPreferred.saveSettingsTo(settings);
+		mongoBatch.saveSettingsTo(settings);
 
 	}
 
@@ -407,9 +404,9 @@ public class MongoNodeModel extends NodeModel {
 		int skips = 0;
 		if (cursor.size() > 2) {
 			skips = cursor.size() / 2;
-			// Skip over half the records, in an attempt to get to core (common)
+			// Skip over some records, in an attempt to get to core (common)
 			// records.
-			// Such records ideally have most columns.\
+			// Such records ideally have most columns.
 			// (Assumes first records may be odd, not having all columns.)
 			cursor.skip(skips);
 		}
@@ -420,8 +417,7 @@ public class MongoNodeModel extends NodeModel {
 			final DataColumnSpec[] allColSpecs = new DataColumnSpec[columnNumber];
 			int k = 0;
 			for (final String name : obj.keySet()) {
-				allColSpecs[k++] = new DataColumnSpecCreator(name.toString(),
-						StringCell.TYPE).createSpec();
+				allColSpecs[k++] = new DataColumnSpecCreator(name.toString(), StringCell.TYPE).createSpec();
 			}
 			outputSpec = new DataTableSpec(allColSpecs);
 		} else {
@@ -434,8 +430,7 @@ public class MongoNodeModel extends NodeModel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void validateSettings(final NodeSettingsRO settings)
-			throws InvalidSettingsException {
+	protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
 
 		// TODO check if the settings could be applied to our model
 		// e.g. if the count is in a certain range (which is ensured by the
@@ -448,6 +443,7 @@ public class MongoNodeModel extends NodeModel {
 		mongoLimit.validateSettings(settings);
 		queryAnd.validateSettings(settings);
 		secondaryPreferred.validateSettings(settings);
+		mongoBatch.validateSettings(settings);
 
 	}
 
