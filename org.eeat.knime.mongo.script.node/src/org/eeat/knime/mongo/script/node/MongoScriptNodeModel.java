@@ -135,7 +135,7 @@ public class MongoScriptNodeModel extends NodeModel {
 			
 			final BasicDBObject qo = (BasicDBObject) JSON.parse(script.getStringValue());
 			logger.debug(String.format("Mongo text %s as query %s" + script.getStringValue(), script.getStringValue(), qo));
-			final DBCursor cursor = db.getCollection(collectionName.getStringValue()).find(qo).limit(10);
+			final DBCursor cursor = db.getCollection(collectionName.getStringValue()).find(qo);
 			logger.debug("Mongo query result size: " + cursor.count());
 
 			while (cursor.hasNext()) {
