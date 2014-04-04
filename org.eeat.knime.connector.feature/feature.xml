@@ -6,7 +6,7 @@
       provider-name="wrobinson.cis.gsu.edu">
 
    <description url="http://wrobinson.cis.gsu.edu/reqmon">
-      EEAT KNIME Google connector nodes, and Git connector nodes.
+      EEAT KNIME Google connector nodes, Git connector nodes, and mongodb nodes.
    </description>
 
    <copyright url="http://www.example.com/copyright">
@@ -152,5 +152,11 @@ e.]
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="org.eeat.knime.mongo.script.node"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
 
 </feature>

@@ -1,0 +1,25 @@
+## See: http://stackoverflow.com/questions/16619598/sync-mongodb-via-ssh
+## dutiap.st.ewi.tudelft.nl:27018
+## localhost is 27017
+## Example of copying collection to local github. (Assumes local is running ssh connected to remote on 27017.)
+##
+## Basic example
+var db2 = connect("localhost:27018/github");
+db2.getMongo().setSlaveOk();
+var db1 = connect("localhost:27017/github");
+db.system.js.remove( { "_id" : "KnimeScript" } );
+
+
+## Function example
+db.system.js.save(
+  { _id: "KnimeScript",
+    value: function() {
+	var db2 = connect("localhost:27018/github");
+	db2.getMongo().setSlaveOk();
+	var db1 = connect("localhost:27017/github");
+	db2.pull_request_comments.find({"repo": "rubinius"}, {"owner": "rubinius"}).forEach(function(p) { db1.pull_request_comments.insert(p); });
+	}
+  }
+ )
+ db.eval("KnimeScript()")
+ db.system.js.remove( { "_id" : "KnimeScript" } );

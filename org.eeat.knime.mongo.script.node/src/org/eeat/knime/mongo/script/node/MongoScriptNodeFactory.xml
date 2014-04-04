@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source"  xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+
+	<name>Mongo Script</name>
+
+	<shortDescription>
+        Mongo Database Script: executes script on mongo database.
+    </shortDescription>
+
+	<fullDescription>
+		<intro>
+			Mongo Database Script
+		</intro>
+		<option name="Host1">Hostname for a mongo database.</option>
+		<option name="Port1">Port for a mongo database.</option>
+		<option name="DB1">Name of a mongo database.</option>
+		<option name="Copy">If true, then execute a collection copy from DB1 to DB2.</option>
+		<option name="Collection">The collection in DB1 that is queried for the copy operation.</option>
+		<option name="Script">
+		If Copy is false, then 'Script' is run on the mongo database: db1.eval(script).
+		<p>
+		If Copy is true, then 'Script' is parsed as a collection query on db1.collection.find(parse(script)). 
+		The resulting objects are inserted into DB2.
+		</p>
+		</option>
+		<option name="Host2">Hostname for the destination mongo database.</option>
+		<option name="Port2">Port for the destination mongo database.</option>
+		<option name="DB2">Name of the destination mongo database.</option>
+	</fullDescription>
+
+	<ports>
+	</ports>
+    <views>
+    </views>	
+</knimeNode>

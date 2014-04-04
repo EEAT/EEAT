@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+
+  <extension
+         point="org.knime.workbench.repository.categories">
+      <category
+            description="Mongo"
+            level-id="Mongo"
+            name="Mongo"
+            path="/EEAT">
+      </category>
+   </extension>
+   
+   <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            category-path="/EEAT/Mongo"
+            factory-class="org.eeat.knime.mongo.script.node.MongoScriptNodeFactory"
+            id="org.eeat.knime.mongo.copy.node.MongoNodeFactory"/>
+   </extension>
+   
+</plugin>

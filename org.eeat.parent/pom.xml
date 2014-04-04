@@ -52,6 +52,7 @@
 		<module>../org.eeat.knime.google.bigquery.node</module>
 		<module>../org.eeat.knime.drools.node</module>
 		<module>../org.eeat.knime.mongo.node</module>
+		<module>../org.eeat.knime.mongo.script.node</module>
 		
 		<module>../org.eeat.knime.git.commentprinter</module>
 		<module>../org.eeat.knime.git.issuecommentprinter</module>

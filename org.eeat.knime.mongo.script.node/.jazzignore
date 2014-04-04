@@ -1,0 +1,57 @@
+### Jazz Ignore 0
+# Default value for core.ignore.recursive is *.class
+#  Changing this value changes check-in behaviour for the entire project. 
+#
+# Default value for core.ignore is bin
+#  Changing this value changes check-in behaviour for the local directory.
+#
+# Ignore properties should contain a space separated list of filename patterns.
+# Each pattern is case sensitive and surrounded by braces ('{' and '}'). 
+# "*" matches zero or more characters, and "?" matches single characters. 
+#
+#   e.g: {*.sh} {\.*}    ignores shell scripts and hidden files
+
+# NOTE: modifying ignore files will not change the ignore status of derived 
+# resources.
+
+core.ignore.recursive= \
+	{#*} \
+	{*$} \
+	{*.BAK} \
+	{*.Z} \
+	{*.bak} \
+	{*.class} \
+	{*.elc} \
+	{*.ln} \
+	{*.log} \
+	{*.merge-left*} \
+	{*.merge-right*} \
+	{*.mine} \
+	{*.o} \
+	{*.obj} \
+	{*.olb} \
+	{*.old} \
+	{*.orig} \
+	{*.prej} \
+	{*.rej} \
+	{*.working} \
+	{*~} \
+	{,*} \
+	{.#*} \
+	{.DS_Store} \
+	{.del-*} \
+	{.deployables} \
+	{.make.state} \
+	{.nse_depinfo} \
+	{.svn} \
+	{CVS.adm} \
+	{RCS} \
+	{RCSLOG} \
+	{SCCS} \
+	{_$*} \
+	{_svn} \
+	{svn-commit*.tmp} \
+	{target} 
+
+core.ignore= \
+	{bin} 
