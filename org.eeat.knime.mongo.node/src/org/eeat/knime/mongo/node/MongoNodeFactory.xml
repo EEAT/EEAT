@@ -108,4 +108,6 @@ $regex Selects documents where values match a specified regular expression.
 		</outPort>
 		<!-- possibly more output ports here -->
 	</ports>
+    <views>
+    </views>	
 </knimeNode>

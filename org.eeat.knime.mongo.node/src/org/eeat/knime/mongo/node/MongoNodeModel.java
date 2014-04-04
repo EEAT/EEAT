@@ -36,6 +36,8 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.ReadPreference;
+import com.mongodb.ServerAddress;
+import com.mongodb.util.JSON;
 
 /**
  * This is the model implementation of BigQuery. Node for reading from bigquery
@@ -46,30 +48,38 @@ public class MongoNodeModel extends NodeModel {
 
 	private static final NodeLogger logger = NodeLogger.getLogger(MongoNodeModel.class);
 
+	// TODO: Remove custom (simpler?) query format:
+	static final String CFG_MONGO_QUERY_AND = "queryAnd";
+	protected final SettingsModelBoolean queryAnd = new SettingsModelBoolean(CFG_MONGO_QUERY_AND, true);
+	// Now the format defaults to the simpler query format
+	static final String CFG_MONGO_QUERY_FORMAT = "mongoQueryFormat";
+	protected final SettingsModelBoolean mongoQueryFormat = new SettingsModelBoolean(CFG_MONGO_QUERY_FORMAT,
+			false);
+
+	// Parameters from GUI
+	static final String CFG_HOST = "Host";
+	protected final SettingsModelString mongoHost = new SettingsModelString(CFG_HOST, "localhost");
+	static final String CFG_PORT = "Port";
+	protected final SettingsModelInteger mongoPort = new SettingsModelInteger(CFG_PORT, 27017);
+	static final String CFG_MONGO_COLL = "mongoColl";
+	protected final SettingsModelString mongoColl = new SettingsModelString(CFG_MONGO_COLL, null);
 	static final String CFG_USER_QUERY = "userQuery";
 	protected final SettingsModelString userQuery = new SettingsModelString(CFG_USER_QUERY, null);
 	static final String CFG_MONGO_DB = "mongoDB";
 	protected final SettingsModelString mongoDB = new SettingsModelString(CFG_MONGO_DB, null);
-	static final String CFG_MONGO_COLL = "mongoColl";
-	protected final SettingsModelString mongoColl = new SettingsModelString(CFG_MONGO_COLL, null);
 	static final String CFG_MONGO_LIMIT = "mongoLimit";
 	protected final SettingsModelInteger mongoLimit = new SettingsModelInteger(CFG_MONGO_LIMIT, 0);
 	static final String CFG_MONGO_BATCH = "mongoBatch";
-	protected final SettingsModelInteger mongoBatch = new SettingsModelInteger(CFG_MONGO_LIMIT, 100);
-	static final String CFG_MONGO_QUERY_AND = "queryAnd";
-	protected final SettingsModelBoolean queryAnd = new SettingsModelBoolean(CFG_MONGO_QUERY_AND, true);
+	protected final SettingsModelInteger mongoBatch = new SettingsModelInteger(CFG_MONGO_BATCH, 100);
 	static final String CFG_MONGO_SECONDARY = "secondary";
 	protected final SettingsModelBoolean secondaryPreferred = new SettingsModelBoolean(CFG_MONGO_SECONDARY,
 			true);
-
 	static final String CFG_MONGO_INCREMENTAL = "incrementalOutput";
 	protected final SettingsModelBoolean mongoIncremental = new SettingsModelBoolean(CFG_MONGO_INCREMENTAL,
 			true);
 	static final String CFG_MONGO_INCREMENT_SIZE = "incrementSize";
 	protected final SettingsModelInteger mongoIncrementSize = new SettingsModelInteger(
 			CFG_MONGO_INCREMENT_SIZE, 100);
-
-	final String MONGO_DB_HOST = "localhost";
 
 	MongoClient mongoClient = null;
 	DB db = null;
@@ -85,14 +95,6 @@ public class MongoNodeModel extends NodeModel {
 		super(0, 1);
 	}
 
-	private void initVars() {
-		mongoClient = null;
-		db = null;
-		rowNumber = 0;
-		cursor = null;
-		outputSpec = null;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -106,19 +108,6 @@ public class MongoNodeModel extends NodeModel {
 		// with null elements), or throw an exception with a useful user message
 
 		return new DataTableSpec[] { null };
-	}
-
-	void establishDBConnection(final String databaseName) {
-		if (db == null) {
-			logger.info("Connecting to mongo database: " + databaseName);
-			db = mongoClient.getDB(databaseName);
-			if (secondaryPreferred.getBooleanValue()) {
-				db.setReadPreference(ReadPreference.secondaryPreferred());
-				logger.info("Secondary preferred on database: " + databaseName);
-			} else {
-				db.setReadPreference(ReadPreference.primaryPreferred());
-			}
-		}
 	}
 
 	BasicDBObject createBasicObject(final String v1, final String v2) {
@@ -138,45 +127,36 @@ public class MongoNodeModel extends NodeModel {
 		return result;
 	}
 
+	BasicDBObject createRegExBasicObject(final String v1, final String v2) {
+		final Pattern p = Pattern.compile(v2);
+		return new BasicDBObject(v1, p);
+	}
+
+	void establishDBConnection(final String databaseName) {
+		if (db == null) {
+			logger.info("Connecting to mongo database: " + databaseName);
+			db = mongoClient.getDB(databaseName);
+			if (secondaryPreferred.getBooleanValue()) {
+				db.setReadPreference(ReadPreference.secondaryPreferred());
+				logger.info("Secondary preferred on database: " + databaseName);
+			} else {
+				db.setReadPreference(ReadPreference.primaryPreferred());
+			}
+		}
+	}
+
 	void establishMongoClient() {
 		if (mongoClient == null) {
 			logger.info("Opening mongo client.");
-			final MongoClientOptions options = MongoClientOptions.builder()
-					.connectionsPerHost(mongoBatch.getIntValue()).autoConnectRetry(true).build();
+			final MongoClientOptions options = MongoClientOptions.builder().autoConnectRetry(true).build();
 			try {
-				mongoClient = new MongoClient(MONGO_DB_HOST, options);
+				mongoClient = new MongoClient(new ServerAddress(mongoHost.getStringValue(),
+						mongoPort.getIntValue()), options);
 			} catch (final Exception e) {
 				logger.info("Cannot open mongo client.");
 				logger.info(e.toString());
 			}
 		}
-	}
-
-	BasicDBObject createRegExBasicObject(final String v1, final String v2) {
-		final Pattern p = Pattern.compile(v2);
-		return new BasicDBObject(v1, p);
-	}
-	
-	DBCursor updateDBCursor() {
-		if (cursor ==null || !mongoIncremental.getBooleanValue()) {
-			cursor = runQuery();
-		}
-		return cursor;		
-	}
-	
-
-	boolean moreData() {
-		boolean mData;
-		if (firstExecuteQuery || !mongoIncremental.getBooleanValue()) {
-			mData = cursor.hasNext();
-		} else {
-			// If incremental, then stop when reach mongoIncrementSize
-			// Next, execute will restart here. 			
-			// firstExecuteQuery ensure that it will get at least one record 
-			mData = cursor.hasNext() && ((rowNumber % mongoIncrementSize.getIntValue()) != 0);
-		}
-		firstExecuteQuery = false;
-		return mData;
 	}
 
 	/**
@@ -255,6 +235,14 @@ public class MongoNodeModel extends NodeModel {
 		return new BufferedDataTable[] { out };
 	}
 
+	private void initVars() {
+		mongoClient = null;
+		db = null;
+		rowNumber = 0;
+		cursor = null;
+		outputSpec = null;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -293,6 +281,28 @@ public class MongoNodeModel extends NodeModel {
 
 	}
 
+	boolean moreData() {
+		boolean mData;
+		if (firstExecuteQuery || !mongoIncremental.getBooleanValue()) {
+			mData = cursor.hasNext();
+		} else {
+			// If incremental, then stop when reach mongoIncrementSize
+			// Next, execute will restart here.
+			// firstExecuteQuery ensure that it will get at least one record
+			mData = cursor.hasNext() && ((rowNumber % mongoIncrementSize.getIntValue()) != 0);
+		}
+		firstExecuteQuery = false;
+		return mData;
+	}
+
+	BasicDBObject parseQuery(final String query, final boolean mongoFormat) {
+		if (mongoFormat) {
+			return (BasicDBObject) JSON.parse(query);
+		} else {
+			return parseQuerySimple(query);
+		}
+	}
+
 	// query:: COND ; COND ; ...
 	// cond:: ATT , VALUE
 	// VALUE:: att, value || att , op , value
@@ -300,7 +310,7 @@ public class MongoNodeModel extends NodeModel {
 	// parenthesis indicates a subdocument
 	// http://docs.mongodb.org/manual/tutorial/query-documents/
 	// See http://docs.mongodb.org/manual/reference/operator/query/
-	BasicDBObject parseQuery(final String query) {
+	BasicDBObject parseQuerySimple(final String query) {
 		// logger.debug("parsing: " + query);
 		final ArrayList<BasicDBObject> opList = new ArrayList<BasicDBObject>();
 		BasicDBObject result = null;
@@ -365,9 +375,9 @@ public class MongoNodeModel extends NodeModel {
 		logger.info("... and query limit: " + mongoLimit.getIntValue());
 		if (userQuery.getStringValue().length() > 0) {
 			if (mongoLimit.getIntValue() > 0) {
-				cursor = coll.find(parseQuery(userQuery.getStringValue())).limit(mongoLimit.getIntValue());
+				cursor = coll.find(parseQuery(userQuery.getStringValue(),mongoQueryFormat.getBooleanValue())).limit(mongoLimit.getIntValue());
 			} else {
-				cursor = coll.find(parseQuery(userQuery.getStringValue())).batchSize(batchSize);
+				cursor = coll.find(parseQuery(userQuery.getStringValue(),mongoQueryFormat.getBooleanValue())).batchSize(batchSize);
 			}
 		} else {
 			if (mongoLimit.getIntValue() > 0) {
@@ -441,6 +451,13 @@ public class MongoNodeModel extends NodeModel {
 			logger.error("Cursor has 0 records.");
 		}
 		return outputSpec;
+	}
+
+	DBCursor updateDBCursor() {
+		if ((cursor == null) || !mongoIncremental.getBooleanValue()) {
+			cursor = runQuery();
+		}
+		return cursor;
 	}
 
 	/**
