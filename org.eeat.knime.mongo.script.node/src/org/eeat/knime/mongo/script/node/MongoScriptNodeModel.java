@@ -2,8 +2,9 @@ package org.eeat.knime.mongo.script.node;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.regex.Pattern;
+import java.util.List;
 
+import org.bson.BSONException;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -21,8 +22,10 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoException.CursorNotFound;
 import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
@@ -38,6 +41,8 @@ public class MongoScriptNodeModel extends NodeModel {
 
 	static final String CFG_MONGO_COPY = "opCopy";
 	protected final SettingsModelBoolean opCopy = new SettingsModelBoolean(CFG_MONGO_COPY, false);
+	static final String CFG_MONGO_NOOP = "noOp";
+	protected final SettingsModelBoolean noOp = new SettingsModelBoolean(CFG_MONGO_NOOP, false);
 
 	static final String CFG_HOST1 = "Host1";
 	protected final SettingsModelString host1 = new SettingsModelString(CFG_HOST1, "localhost");
@@ -112,10 +117,6 @@ public class MongoScriptNodeModel extends NodeModel {
 		return result;
 	}
 
-	BasicDBObject createRegExBasicObject(final String v1, final String v2) {
-		final Pattern p = Pattern.compile(v2);
-		return new BasicDBObject(v1, p);
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -124,32 +125,63 @@ public class MongoScriptNodeModel extends NodeModel {
 	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec)
 			throws Exception {
 		logger.debug("Starting mongo shell execution.");
-		final MongoClient client = newMongoClient(host1.getStringValue(), port1.getIntValue());
-		// If copy, then read only for source db1
-		final DB db = connectDB(client, dB1.getStringValue(), opCopy.getBooleanValue()); 
-		// logger.info("Mongo execution result: " + db1.eval("db.serverStatus()")); // Test
-
-		if (opCopy.getBooleanValue()) {
-			final MongoClient client2 = newMongoClient(host2.getStringValue(), port2.getIntValue());
-			final DB db2 = connectDB(client2, dB2.getStringValue(), false); 
-			
-			final BasicDBObject qo = (BasicDBObject) JSON.parse(script.getStringValue());
-			logger.debug(String.format("Mongo text %s as query %s" + script.getStringValue(), script.getStringValue(), qo));
-			final DBCursor cursor = db.getCollection(collectionName.getStringValue()).find(qo);
-			logger.debug("Mongo query result size: " + cursor.count());
-
-			while (cursor.hasNext()) {
-				final BasicDBObject b = (BasicDBObject) cursor.next();
-				logger.debug(String.format("Mongo copy %s into %s", b, dB2.getStringValue()));
-				db2.getCollection(collectionName.getStringValue()).insert(b);
-			}
-
-		} else {
-			logger.debug("Mongo execution script: " + script.getStringValue());
-			logger.info("Mongo execution result: " + db.eval(script.getStringValue()));
+		if (noOp.getBooleanValue()) {
+			logger.warn("Mongodb copy: No Operation is true, so no execution.");
+			return null; // EARLY EXIT
 		}
 
-//		return new BufferedDataTable[] {};
+		final MongoClient client = newMongoClient(host1.getStringValue(), port1.getIntValue());
+		// If copy, then read only for source db1
+		final DB db = connectDB(client, dB1.getStringValue(), opCopy.getBooleanValue());
+		// logger.info("Mongo execution result: " + db1.eval("db.serverStatus()")); // Test
+		if (opCopy.getBooleanValue()) {
+			final MongoClient client2 = newMongoClient(host2.getStringValue(), port2.getIntValue());
+			final DB db2 = connectDB(client2, dB2.getStringValue(), false);
+
+			final BasicDBObject qo = (BasicDBObject) JSON.parse(script.getStringValue());
+			logger.debug(String.format("Text %s as query %s", script.getStringValue(), qo));
+			DBCursor cursor = db.getCollection(collectionName.getStringValue()).find(qo);
+			final int OBJECT_BUFFER_SIZE = 4000;
+			int rowNumber = 0;
+			List<DBObject> objects;
+			final int totalRows = cursor.size();
+			try {
+				// Loop design based on this:
+				// http://stackoverflow.com/questions/18525348/better-way-to-move-mongodb-collection-to-another-collection/20889762#20889762
+				// Use multiple threads to improve
+				do {
+					logger.debug(String.format("%s processing rows %d - %d of %d for copy into %s",
+							collectionName.getStringValue(), rowNumber, (rowNumber + OBJECT_BUFFER_SIZE) - 1,
+							totalRows, dB2.getStringValue()));
+					cursor = db.getCollection(collectionName.getStringValue()).find(qo)
+							.sort(new BasicDBObject("$natural", 1)).skip(rowNumber).limit(OBJECT_BUFFER_SIZE);
+					objects = cursor.toArray();
+					try {
+						if (objects.size() > 0) {
+							db2.getCollection(collectionName.getStringValue()).insert(objects);
+						}
+					} catch (final BSONException e) {
+						logger.warn(String.format(
+								"Copy %s %s: mongodb error. A row between %d - %d will be skipped.",
+								dB1.getStringValue(), collectionName.getStringValue(), rowNumber, rowNumber
+										+ OBJECT_BUFFER_SIZE));
+						logger.error(e);
+					}
+					rowNumber = rowNumber + objects.size();
+					// check if the execution monitor was canceled
+					exec.checkCanceled();
+					exec.setProgress(rowNumber / (double) totalRows, "Adding rows " + rowNumber);
+				} while (rowNumber < totalRows);
+			} catch (final CursorNotFound e) {
+				logger.warn(String.format("Copy %s %s: mongodb fatal error. Ending at row %d.",
+						dB1.getStringValue(), collectionName.getStringValue(), rowNumber));
+				logger.error(e);
+			}
+		} else {
+			logger.debug("Execution script: " + script.getStringValue());
+			logger.info("Execution result: " + db.eval(script.getStringValue()));
+		}
+		// return new BufferedDataTable[] {};
 		return null;
 	}
 
@@ -187,11 +219,17 @@ public class MongoScriptNodeModel extends NodeModel {
 		dB2.loadSettingsFrom(settings);
 
 		opCopy.loadSettingsFrom(settings);
+		noOp.loadSettingsFrom(settings);
 	}
 
 	MongoClient newMongoClient(final String host, final int port) {
 		logger.debug(String.format("Opening mongo client on %s : %s.", host, port));
 		MongoClient mongoClient = null;
+		
+		// TODO Add password
+//		MongoCredential credential = MongoCredential.createMongoCRCredential("user1", "test", "password1".toCharArray());
+//		MongoClient mongoClient = new MongoClient(new ServerAddress(server), Arrays.asList(credential));
+		
 		final MongoClientOptions options = MongoClientOptions.builder().autoConnectRetry(true).build();
 		try {
 			mongoClient = new MongoClient(new ServerAddress(host, port), options);
@@ -245,6 +283,7 @@ public class MongoScriptNodeModel extends NodeModel {
 		dB2.saveSettingsTo(settings);
 
 		opCopy.saveSettingsTo(settings);
+		noOp.saveSettingsTo(settings);
 	}
 
 	/**
@@ -264,6 +303,7 @@ public class MongoScriptNodeModel extends NodeModel {
 		dB2.validateSettings(settings);
 
 		opCopy.validateSettings(settings);
+		noOp.validateSettings(settings);
 	}
 
 }

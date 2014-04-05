@@ -16,6 +16,7 @@
 		<option name="Port1">Port for a mongo database.</option>
 		<option name="DB1">Name of a mongo database.</option>
 		<option name="Copy">If true, then execute a collection copy from DB1 to DB2.</option>
+		<option name="No Operation">If true, then does everything but the copy operation. (For testing purposes. Does not apply to non-copy script execution.)</option>
 		<option name="Collection">The collection in DB1 that is queried for the copy operation.</option>
 		<option name="Script">
 		If Copy is false, then 'Script' is run on the mongo database: db1.eval(script).

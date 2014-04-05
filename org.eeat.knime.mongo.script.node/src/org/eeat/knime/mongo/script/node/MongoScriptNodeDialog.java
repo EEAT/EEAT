@@ -27,6 +27,8 @@ public class MongoScriptNodeDialog extends DefaultNodeSettingsPane {
 	protected MongoScriptNodeDialog() {
 		super();
 		addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(
+				MongoScriptNodeModel.CFG_MONGO_NOOP, false), "No operation"));
+		addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(
 				MongoScriptNodeModel.CFG_MONGO_COPY, false), "Copy operation"));
 
 		addDialogComponent(new DialogComponentString(new SettingsModelString(MongoScriptNodeModel.CFG_HOST1,
