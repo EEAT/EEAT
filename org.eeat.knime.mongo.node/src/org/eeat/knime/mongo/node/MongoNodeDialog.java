@@ -4,6 +4,7 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentMultiLineString;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentPasswordField;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
@@ -26,14 +27,18 @@ public class MongoNodeDialog extends DefaultNodeSettingsPane {
 	 */
 	protected MongoNodeDialog() {
 		super();
+		addDialogComponent(new DialogComponentString(new SettingsModelString(MongoNodeModel.CFG_ID,
+				"admin"), "ID", false, 10));
+		addDialogComponent(new DialogComponentPasswordField(new SettingsModelString(MongoNodeModel.CFG_PASSWORD,
+				"1234"), "Password", 10));
 		addDialogComponent(new DialogComponentString(new SettingsModelString(MongoNodeModel.CFG_HOST,
-				"localhost"), "Host"));
+				"localhost"), "Host", true, 10));
 		addDialogComponent(new DialogComponentNumber(
 				new SettingsModelInteger(MongoNodeModel.CFG_PORT, 27017), "Port", 1));
 		addDialogComponent(new DialogComponentString(new SettingsModelString(MongoNodeModel.CFG_MONGO_DB,
-				"test"), "Database"));
+				"test"), "Database", true, 10));
 		addDialogComponent(new DialogComponentString(new SettingsModelString(MongoNodeModel.CFG_MONGO_COLL,
-				"users"), "Collection"));		
+				"users"), "Collection", true, 10));		
 		addDialogComponent(new DialogComponentMultiLineString(new SettingsModelString(
 				MongoNodeModel.CFG_USER_QUERY, ""), "Query", true, 1, 5));
 		addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(

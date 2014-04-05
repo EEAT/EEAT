@@ -35,6 +35,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
 import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
@@ -57,6 +58,10 @@ public class MongoNodeModel extends NodeModel {
 			false);
 
 	// Parameters from GUI
+	static final String CFG_ID = "ID";
+	protected final SettingsModelString mongoID = new SettingsModelString(CFG_ID, "admin");
+	static final String CFG_PASSWORD = "Password";
+	protected final SettingsModelString mongoPassword = new SettingsModelString(CFG_PASSWORD, "1234");
 	static final String CFG_HOST = "Host";
 	protected final SettingsModelString mongoHost = new SettingsModelString(CFG_HOST, "localhost");
 	static final String CFG_PORT = "Port";
@@ -66,7 +71,7 @@ public class MongoNodeModel extends NodeModel {
 	static final String CFG_USER_QUERY = "userQuery";
 	protected final SettingsModelString userQuery = new SettingsModelString(CFG_USER_QUERY, null);
 	static final String CFG_MONGO_DB = "mongoDB";
-	protected final SettingsModelString mongoDB = new SettingsModelString(CFG_MONGO_DB, null);
+	protected final SettingsModelString mongoDB = new SettingsModelString(CFG_MONGO_DB, "localhost");
 	static final String CFG_MONGO_LIMIT = "mongoLimit";
 	protected final SettingsModelInteger mongoLimit = new SettingsModelInteger(CFG_MONGO_LIMIT, 0);
 	static final String CFG_MONGO_BATCH = "mongoBatch";
@@ -134,28 +139,54 @@ public class MongoNodeModel extends NodeModel {
 
 	void establishDBConnection(final String databaseName) {
 		if (db == null) {
-			logger.info("Connecting to mongo database: " + databaseName);
-			db = mongoClient.getDB(databaseName);
-			if (secondaryPreferred.getBooleanValue()) {
-				db.setReadPreference(ReadPreference.secondaryPreferred());
-				logger.info("Secondary preferred on database: " + databaseName);
-			} else {
-				db.setReadPreference(ReadPreference.primaryPreferred());
-			}
+			db = connectDB(mongoClient, databaseName, secondaryPreferred.getBooleanValue());
 		}
+	}
+	
+	DB connectDB(final MongoClient client, final String databaseName, final boolean secondaryPreferred) {
+		DB db;
+		final String host = client.getAddress().getHost();
+		final int port = client.getAddress().getPort();
+		logger.info(String.format("Connecting to mongo database: %s on host %s at port %s", databaseName,
+				host, port));
+		db = client.getDB(databaseName);
+		if (secondaryPreferred) {
+			db.setReadPreference(ReadPreference.secondaryPreferred());
+			logger.debug("Secondary preferred on database: " + databaseName);
+		} else {
+			db.setReadPreference(ReadPreference.primaryPreferred());
+		}
+		return db;
+	}
+	
+	MongoClient newMongoClient(final String host, final int port, final String db) {
+		logger.debug(String.format("Opening mongo client on %s : %s for ID %s.", host, port, mongoID.getStringValue()));
+		MongoClient mongoClient = null;
+		MongoCredential credential = null;
+		if (mongoID.getStringValue().length() > 0) {
+			credential = MongoCredential.createMongoCRCredential(mongoID.getStringValue(),
+					db, mongoPassword.getStringValue().toCharArray());
+		}
+		final MongoClientOptions options = MongoClientOptions.builder().autoConnectRetry(true).build();
+		try {
+			if (credential != null) {
+				mongoClient = new MongoClient(new ServerAddress(host,
+						port), Arrays.asList(credential), options);
+
+			} else {
+				mongoClient = new MongoClient(new ServerAddress(host,
+						port), options);
+			}
+		} catch (final Exception e) {
+			logger.info("Cannot open mongo client.");
+			logger.info(e.toString());
+		}
+		return mongoClient;
 	}
 
 	void establishMongoClient() {
 		if (mongoClient == null) {
-			logger.info("Opening mongo client.");
-			final MongoClientOptions options = MongoClientOptions.builder().autoConnectRetry(true).build();
-			try {
-				mongoClient = new MongoClient(new ServerAddress(mongoHost.getStringValue(),
-						mongoPort.getIntValue()), options);
-			} catch (final Exception e) {
-				logger.info("Cannot open mongo client.");
-				logger.info(e.toString());
-			}
+			mongoClient=  newMongoClient(mongoHost.getStringValue(), mongoPort.getIntValue(), mongoDB.getStringValue());
 		}
 	}
 
@@ -264,11 +295,9 @@ public class MongoNodeModel extends NodeModel {
 	 */
 	@Override
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-
 		// TODO load (valid) settings from the config object.
 		// It can be safely assumed that the settings are valided by the
 		// method below.
-
 		userQuery.loadSettingsFrom(settings);
 		mongoDB.loadSettingsFrom(settings);
 		mongoColl.loadSettingsFrom(settings);
@@ -278,7 +307,12 @@ public class MongoNodeModel extends NodeModel {
 		mongoBatch.loadSettingsFrom(settings);
 		mongoIncremental.loadSettingsFrom(settings);
 		mongoIncrementSize.loadSettingsFrom(settings);
-
+		
+		mongoHost.loadSettingsFrom(settings);
+		mongoPort.loadSettingsFrom(settings);
+		mongoDB.loadSettingsFrom(settings);
+		mongoID.loadSettingsFrom(settings);
+		mongoPassword.loadSettingsFrom(settings);
 	}
 
 	boolean moreData() {
@@ -423,6 +457,12 @@ public class MongoNodeModel extends NodeModel {
 		mongoBatch.saveSettingsTo(settings);
 		mongoIncremental.saveSettingsTo(settings);
 		mongoIncrementSize.saveSettingsTo(settings);
+		
+		mongoHost.saveSettingsTo(settings);
+		mongoPort.saveSettingsTo(settings);
+		mongoDB.saveSettingsTo(settings);
+		mongoID.saveSettingsTo(settings);
+		mongoPassword.saveSettingsTo(settings);
 
 	}
 
@@ -480,6 +520,12 @@ public class MongoNodeModel extends NodeModel {
 		mongoBatch.validateSettings(settings);
 		mongoIncremental.validateSettings(settings);
 		mongoIncrementSize.validateSettings(settings);
+		
+		mongoHost.validateSettings(settings);
+		mongoPort.validateSettings(settings);
+		mongoDB.validateSettings(settings);
+		mongoID.validateSettings(settings);
+		mongoPassword.validateSettings(settings);
 
 	}
 

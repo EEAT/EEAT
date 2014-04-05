@@ -2,6 +2,7 @@ package org.eeat.knime.mongo.script.node;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bson.BSONException;
@@ -25,6 +26,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
 import com.mongodb.MongoException.CursorNotFound;
 import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
@@ -39,11 +41,16 @@ public class MongoScriptNodeModel extends NodeModel {
 
 	private static final NodeLogger logger = NodeLogger.getLogger(MongoScriptNodeModel.class);
 
+	
 	static final String CFG_MONGO_COPY = "opCopy";
 	protected final SettingsModelBoolean opCopy = new SettingsModelBoolean(CFG_MONGO_COPY, false);
 	static final String CFG_MONGO_NOOP = "noOp";
 	protected final SettingsModelBoolean noOp = new SettingsModelBoolean(CFG_MONGO_NOOP, false);
 
+	static final String CFG_ID = "ID";
+	protected final SettingsModelString mongoID = new SettingsModelString(CFG_ID, "admin");
+	static final String CFG_PASSWORD = "Password";
+	protected final SettingsModelString mongoPassword = new SettingsModelString(CFG_PASSWORD, "1234");
 	static final String CFG_HOST1 = "Host1";
 	protected final SettingsModelString host1 = new SettingsModelString(CFG_HOST1, "localhost");
 	static final String CFG_PORT1 = "Port1";
@@ -130,12 +137,12 @@ public class MongoScriptNodeModel extends NodeModel {
 			return null; // EARLY EXIT
 		}
 
-		final MongoClient client = newMongoClient(host1.getStringValue(), port1.getIntValue());
+		final MongoClient client = newMongoClient(host1.getStringValue(), port1.getIntValue(), dB1.getStringValue());
 		// If copy, then read only for source db1
 		final DB db = connectDB(client, dB1.getStringValue(), opCopy.getBooleanValue());
 		// logger.info("Mongo execution result: " + db1.eval("db.serverStatus()")); // Test
 		if (opCopy.getBooleanValue()) {
-			final MongoClient client2 = newMongoClient(host2.getStringValue(), port2.getIntValue());
+			final MongoClient client2 = newMongoClient(host2.getStringValue(), port2.getIntValue(), dB2.getStringValue());
 			final DB db2 = connectDB(client2, dB2.getStringValue(), false);
 
 			final BasicDBObject qo = (BasicDBObject) JSON.parse(script.getStringValue());
@@ -217,28 +224,39 @@ public class MongoScriptNodeModel extends NodeModel {
 		host2.loadSettingsFrom(settings);
 		port2.loadSettingsFrom(settings);
 		dB2.loadSettingsFrom(settings);
+		
+		mongoID.loadSettingsFrom(settings);
+		mongoPassword.loadSettingsFrom(settings);
 
 		opCopy.loadSettingsFrom(settings);
 		noOp.loadSettingsFrom(settings);
 	}
 
-	MongoClient newMongoClient(final String host, final int port) {
-		logger.debug(String.format("Opening mongo client on %s : %s.", host, port));
+	MongoClient newMongoClient(final String host,  final int port, final String db) {
+		logger.debug(String.format("Opening mongo client on %s : %s for ID %s.", host, port, mongoID.getStringValue()));
 		MongoClient mongoClient = null;
-		
-		// TODO Add password
-//		MongoCredential credential = MongoCredential.createMongoCRCredential("user1", "test", "password1".toCharArray());
-//		MongoClient mongoClient = new MongoClient(new ServerAddress(server), Arrays.asList(credential));
-		
+		MongoCredential credential = null;
+		if (mongoID.getStringValue().length() > 0) {
+			credential = MongoCredential.createMongoCRCredential(mongoID.getStringValue(),
+					db, mongoPassword.getStringValue().toCharArray());
+		}
 		final MongoClientOptions options = MongoClientOptions.builder().autoConnectRetry(true).build();
 		try {
-			mongoClient = new MongoClient(new ServerAddress(host, port), options);
+			if (credential != null) {
+				mongoClient = new MongoClient(new ServerAddress(host,
+						port), Arrays.asList(credential), options);
+
+			} else {
+				mongoClient = new MongoClient(new ServerAddress(host,
+						port), options);
+			}
 		} catch (final Exception e) {
 			logger.info("Cannot open mongo client.");
 			logger.info(e.toString());
 		}
 		return mongoClient;
 	}
+			
 
 	/**
 	 * {@inheritDoc}
@@ -281,6 +299,9 @@ public class MongoScriptNodeModel extends NodeModel {
 		host2.saveSettingsTo(settings);
 		port2.saveSettingsTo(settings);
 		dB2.saveSettingsTo(settings);
+		
+		mongoID.saveSettingsTo(settings);
+		mongoPassword.saveSettingsTo(settings);
 
 		opCopy.saveSettingsTo(settings);
 		noOp.saveSettingsTo(settings);
@@ -302,6 +323,9 @@ public class MongoScriptNodeModel extends NodeModel {
 		port2.validateSettings(settings);
 		dB2.validateSettings(settings);
 
+		mongoID.validateSettings(settings);
+		mongoPassword.validateSettings(settings);
+		
 		opCopy.validateSettings(settings);
 		noOp.validateSettings(settings);
 	}

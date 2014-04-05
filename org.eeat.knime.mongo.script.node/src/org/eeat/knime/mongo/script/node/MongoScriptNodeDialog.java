@@ -4,6 +4,7 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentMultiLineString;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentPasswordField;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
@@ -26,6 +27,10 @@ public class MongoScriptNodeDialog extends DefaultNodeSettingsPane {
 	 */
 	protected MongoScriptNodeDialog() {
 		super();
+		addDialogComponent(new DialogComponentString(new SettingsModelString(MongoScriptNodeModel.CFG_ID,
+				"admin"), "ID", false, 10));
+		addDialogComponent(new DialogComponentPasswordField(new SettingsModelString(MongoScriptNodeModel.CFG_PASSWORD,
+				"1234"), "Password", 10));		
 		addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(
 				MongoScriptNodeModel.CFG_MONGO_NOOP, false), "No operation"));
 		addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(
