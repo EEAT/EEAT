@@ -226,7 +226,7 @@ public class MongoNodeModel extends NodeModel {
 			while (moreData()) {
 				final DBObject obj = cursor.next();
 				key = new RowKey(rowNumber + "");
-				logger.debug(rowNumber + ": " + obj);
+//				logger.debug(rowNumber + ": " + obj);
 				final DataCell[] newcells = new DataCell[outputSpec.getNumColumns()];
 				int j = 0;
 				for (final String k : outputSpec.getColumnNames()) {
