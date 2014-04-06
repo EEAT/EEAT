@@ -1,7 +1,9 @@
 package org.eeat.knime.mongo.script.node;
 
+import java.nio.charset.Charset;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,13 +25,16 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCursor;
+import com.mongodb.DBEncoder;
 import com.mongodb.DBObject;
+import com.mongodb.DefaultDBEncoder;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.MongoException.CursorNotFound;
 import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
+import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
 
 /**
@@ -123,6 +128,32 @@ public class MongoScriptNodeModel extends NodeModel {
 		}
 		return result;
 	}
+	
+	List<DBObject> ensureUTF8(List<DBObject> objects) {
+		List<DBObject> result = new ArrayList<DBObject>();
+		for (DBObject o : objects) {
+			final DBObject qo = (DBObject) JSON.parse(stripControlChars(o.toString()));
+			result.add(qo);
+		}
+		return result;
+	}
+	
+	
+	String stripControlChars(String s) {
+		int length = s.length();
+		char[] oldChars = new char[length];
+		s.getChars(0, length, oldChars, 0);
+		int newLen = 0;
+		for (int j = 0; j < length; j++) {
+		    char ch = oldChars[j];
+		    if (ch >= ' ') {
+		        oldChars[newLen] = ch;
+		        newLen++;
+		    }
+		}
+		return new String(oldChars, 0, newLen);
+	}
+
 
 
 	/**
@@ -162,14 +193,15 @@ public class MongoScriptNodeModel extends NodeModel {
 							totalRows, dB2.getStringValue()));
 					cursor = db.getCollection(collectionName.getStringValue()).find(qo)
 							.sort(new BasicDBObject("$natural", 1)).skip(rowNumber).limit(OBJECT_BUFFER_SIZE);
-					objects = cursor.toArray();
+					// Some data is messed up
+					objects = ensureUTF8(cursor.toArray());
 					try {
 						if (objects.size() > 0) {
 							db2.getCollection(collectionName.getStringValue()).insert(objects);
 						}
 					} catch (final BSONException e) {
 						logger.warn(String.format(
-								"Copy %s %s: mongodb error. A row between %d - %d will be skipped.",
+								"Copy %s %s: mongodb error.The rows between %d - %d will be skipped.",
 								dB1.getStringValue(), collectionName.getStringValue(), rowNumber, rowNumber
 										+ OBJECT_BUFFER_SIZE));
 						logger.error(e);
