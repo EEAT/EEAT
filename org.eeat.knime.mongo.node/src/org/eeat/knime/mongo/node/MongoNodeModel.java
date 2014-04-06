@@ -41,7 +41,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.util.JSON;
 
 /**
- * This is the model implementation of BigQuery. Node for reading from bigquery
+ * This is the model implementation of MongoNode. Node for reading from MongoNode
  * 
  * @author
  */
@@ -307,6 +307,7 @@ public class MongoNodeModel extends NodeModel {
 		mongoBatch.loadSettingsFrom(settings);
 		mongoIncremental.loadSettingsFrom(settings);
 		mongoIncrementSize.loadSettingsFrom(settings);
+		mongoQueryFormat.loadSettingsFrom(settings);
 		
 		mongoHost.loadSettingsFrom(settings);
 		mongoPort.loadSettingsFrom(settings);
@@ -331,7 +332,9 @@ public class MongoNodeModel extends NodeModel {
 
 	BasicDBObject parseQuery(final String query, final boolean mongoFormat) {
 		if (mongoFormat) {
-			return (BasicDBObject) JSON.parse(query);
+			final BasicDBObject qo = (BasicDBObject) JSON.parse(query);
+			logger.debug(String.format("Text %s as query %s", query, qo));
+			return qo;
 		} else {
 			return parseQuerySimple(query);
 		}
@@ -457,6 +460,7 @@ public class MongoNodeModel extends NodeModel {
 		mongoBatch.saveSettingsTo(settings);
 		mongoIncremental.saveSettingsTo(settings);
 		mongoIncrementSize.saveSettingsTo(settings);
+		mongoQueryFormat.saveSettingsTo(settings);
 		
 		mongoHost.saveSettingsTo(settings);
 		mongoPort.saveSettingsTo(settings);
@@ -520,6 +524,7 @@ public class MongoNodeModel extends NodeModel {
 		mongoBatch.validateSettings(settings);
 		mongoIncremental.validateSettings(settings);
 		mongoIncrementSize.validateSettings(settings);
+		mongoQueryFormat.validateSettings(settings);
 		
 		mongoHost.validateSettings(settings);
 		mongoPort.validateSettings(settings);
