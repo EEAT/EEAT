@@ -17,7 +17,7 @@ db.system.js.save(
 	var db2 = connect("localhost:27018/github");
 	db2.getMongo().setSlaveOk();
 	var db1 = connect("localhost:27017/github");
-	db2.pull_request_comments.find({"repo": "rubinius"}, {"owner": "rubinius"}).forEach(function(p) { db1.pull_request_comments.insert(p); });
+	db2.issues.find({repo: "rubinius"}, {owner: "rubinius"}).forEach(function(p) { db1.issues.insert(p); });
 	}
   }
  )

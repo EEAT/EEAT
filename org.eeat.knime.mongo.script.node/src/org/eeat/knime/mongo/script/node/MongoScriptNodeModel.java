@@ -1,6 +1,5 @@
 package org.eeat.knime.mongo.script.node;
 
-import java.nio.charset.Charset;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,16 +24,13 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCursor;
-import com.mongodb.DBEncoder;
 import com.mongodb.DBObject;
-import com.mongodb.DefaultDBEncoder;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.MongoException.CursorNotFound;
 import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
-import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
 
 /**
@@ -138,6 +134,15 @@ public class MongoScriptNodeModel extends NodeModel {
 		return result;
 	}
 	
+	List<DBObject> toArrayEnsureUTF8(DBCursor cursor) {
+		List<DBObject> result = new ArrayList<DBObject>();
+		while (cursor.hasNext()) {
+			final DBObject qo = (DBObject) JSON.parse(stripControlChars(cursor.next().toString()));
+			result.add(qo);
+		}
+		return result;
+	}
+	
 	
 	String stripControlChars(String s) {
 		int length = s.length();
@@ -194,7 +199,8 @@ public class MongoScriptNodeModel extends NodeModel {
 					cursor = db.getCollection(collectionName.getStringValue()).find(qo)
 							.sort(new BasicDBObject("$natural", 1)).skip(rowNumber).limit(OBJECT_BUFFER_SIZE);
 					// Some data is messed up
-					objects = ensureUTF8(cursor.toArray());
+//					objects = ensureUTF8(cursor.toArray());
+					objects = toArrayEnsureUTF8(cursor);
 					try {
 						if (objects.size() > 0) {
 							db2.getCollection(collectionName.getStringValue()).insert(objects);
