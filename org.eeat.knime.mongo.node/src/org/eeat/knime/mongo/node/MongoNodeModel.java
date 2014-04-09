@@ -12,6 +12,7 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowKey;
+import org.knime.core.data.container.ContainerTable;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
@@ -211,46 +212,47 @@ public class MongoNodeModel extends NodeModel {
 			if (outputSpec == null) {
 				outputSpec = specifyDataContainer(cursor.copy());
 			}
-			if (outputSpec == null) {
-				logger.error("Query results in empty set.");
-				throw new RuntimeException("Query result is empty"); // EARLY
-																		// EXIT
-			}
+			if (outputSpec == null || outputSpec.getNumColumns()==0) {
+				logger.warn("Query results in empty set.");
+				container = exec.createDataContainer(outputSpec);
+				container.close();
+				out =container.getTable();
+			} else {
+				// the execution context will provide us with storage capacity, in this
+				// case a data container to which we will add rows sequentially
+				// Note, this container can also handle arbitrary big data tables, it
+				// will buffer to disc if necessary.
+				container = exec.createDataContainer(outputSpec);
 
-			// the execution context will provide us with storage capacity, in this
-			// case a data container to which we will add rows sequentially
-			// Note, this container can also handle arbitrary big data tables, it
-			// will buffer to disc if necessary.
-			container = exec.createDataContainer(outputSpec);
-
-			while (moreData()) {
-				final DBObject obj = cursor.next();
-				key = new RowKey(rowNumber + "");
-//				logger.debug(rowNumber + ": " + obj);
-				final DataCell[] newcells = new DataCell[outputSpec.getNumColumns()];
-				int j = 0;
-				for (final String k : outputSpec.getColumnNames()) {
-					if (obj.containsField(k)) {
-						newcells[j++] = new StringCell(obj.get(k) != null ? obj.get(k).toString() : "");
+				while (moreData()) {
+					final DBObject obj = cursor.next();
+					key = new RowKey(rowNumber + "");
+					// logger.debug(rowNumber + ": " + obj);
+					final DataCell[] newcells = new DataCell[outputSpec.getNumColumns()];
+					int j = 0;
+					for (final String k : outputSpec.getColumnNames()) {
+						if (obj.containsField(k)) {
+							newcells[j++] = new StringCell(obj.get(k) != null ? obj.get(k).toString() : "");
+						}
+						// If the new row has more columns than the data spec, then stop adding columns
+						// Possible because mongo records may not be the same length.
+						if (j >= outputSpec.getNumColumns()) {
+							break;
+						}
 					}
-					// If the new row has more columns than the data spec, then stop adding columns
-					// Possible because mongo records may not be the same length.
-					if (j >= outputSpec.getNumColumns()) {
-						break;
+					// Fill the remaining with empty, when there are blank columns.
+					for (int idx = j; idx < outputSpec.getNumColumns(); idx++) {
+						newcells[idx] = new StringCell("");
 					}
-				}
-				// Fill the remaining with empty, when there are blank columns.
-				for (int idx = j; idx < outputSpec.getNumColumns(); idx++) {
-					newcells[idx] = new StringCell("");
-				}
-				container.addRowToTable(new DefaultRow(key, newcells));
+					container.addRowToTable(new DefaultRow(key, newcells));
 
-				// check if the execution monitor was canceled
-				exec.checkCanceled();
-				exec.setProgress(rowNumber / (double) cursor.size(), "Adding row " + rowNumber);
+					// check if the execution monitor was canceled
+					exec.checkCanceled();
+					exec.setProgress(rowNumber / (double) cursor.size(), "Adding row " + rowNumber);
 
-				// next
-				rowNumber = rowNumber + 1;
+					// next
+					rowNumber = rowNumber + 1;
+				}
 			}
 		} catch (final Exception e) {
 			logger.error(e.toString());
@@ -404,17 +406,20 @@ public class MongoNodeModel extends NodeModel {
 
 	DBCursor runQuery() {
 		// Run query
-		logger.info("Accessing mongo collection: " + mongoColl.getStringValue());
+		logger.info(String.format("On %s %s, running query: %s with limit %d", db.getName(),
+				mongoColl.getStringValue(), userQuery.getStringValue(), mongoLimit.getIntValue()));
 		final DBCollection coll = db.getCollection(mongoColl.getStringValue());
 		DBCursor cursor;
 		final int batchSize = 100;
-		logger.info("Running mongo query: " + userQuery.getStringValue());
-		logger.info("... and query limit: " + mongoLimit.getIntValue());
 		if (userQuery.getStringValue().length() > 0) {
 			if (mongoLimit.getIntValue() > 0) {
-				cursor = coll.find(parseQuery(userQuery.getStringValue(),mongoQueryFormat.getBooleanValue())).limit(mongoLimit.getIntValue());
+				cursor = coll
+						.find(parseQuery(userQuery.getStringValue(), mongoQueryFormat.getBooleanValue()))
+						.limit(mongoLimit.getIntValue());
 			} else {
-				cursor = coll.find(parseQuery(userQuery.getStringValue(),mongoQueryFormat.getBooleanValue())).batchSize(batchSize);
+				cursor = coll
+						.find(parseQuery(userQuery.getStringValue(), mongoQueryFormat.getBooleanValue()))
+						.batchSize(batchSize);
 			}
 		} else {
 			if (mongoLimit.getIntValue() > 0) {
@@ -423,7 +428,7 @@ public class MongoNodeModel extends NodeModel {
 				cursor = coll.find().batchSize(batchSize);
 			}
 		}
-		logger.info("Result size: " + cursor.size());
+		logger.info(String.format("Result size of %s is %d",userQuery.getStringValue(),cursor.size()));
 		return cursor;
 	}
 
@@ -492,7 +497,8 @@ public class MongoNodeModel extends NodeModel {
 			}
 			outputSpec = new DataTableSpec(allColSpecs);
 		} else {
-			logger.error("Cursor has 0 records.");
+			logger.warn("Cursor has 0 records.");
+			outputSpec = new DataTableSpec(new DataColumnSpec[0]);
 		}
 		return outputSpec;
 	}

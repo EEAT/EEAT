@@ -135,18 +135,22 @@ public class DroolsNodeModel extends NodeModel {
     	BufferedDataTable out = null;
 		DataTableSpec outputSpec = createTableSpec(drools);
     	List<Object> results = getDroolsResults(drools);    	
+    	BufferedDataContainer container = exec.createDataContainer(outputSpec);
     	int rowNum =0;
-		if (!results.isEmpty()) {
-			BufferedDataContainer container = exec.createDataContainer(outputSpec);
+		if (!results.isEmpty()) {			
 			for (Object  r : results) {				
 	            container.addRowToTable(createDataRow(drools,r,rowNum));
 	            // check if the execution monitor was canceled
 	            exec.checkCanceled();
 	            exec.setProgress(rowNum / (double) results.size(), "Adding row " + rowNum++);
 			}
-	        container.close();
-	        out = container.getTable();
+
 		}
+		else {
+			logger.warn("Drool results in empty set.");
+		}
+        container.close();
+        out = container.getTable();
 		return out;
     }
     

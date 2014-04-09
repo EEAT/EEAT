@@ -158,6 +158,29 @@ public class MongoScriptNodeModel extends NodeModel {
 		}
 		return new String(oldChars, 0, newLen);
 	}
+	
+	
+	// This should be faster, but I don't notice any improvement.
+	// Apparently, due to per-database lock for writers
+	// http://docs.mongodb.org/manual/faq/concurrency/
+	void writeData(final DB db, final List<DBObject> objects, final int rowNumber, final NodeLogger logger) {
+		if (objects.size() > 0) {
+			new Thread(db.getName() + rowNumber) {
+				public void run() {
+					try {
+						db.getCollection(collectionName.getStringValue()).insert(objects);
+						logger.debug(String.format("Wrote %s %s: %s rows.", db.getName(),
+								collectionName.getStringValue(), rowNumber));
+					} catch (final BSONException e) {
+						logger.warn(String.format(
+								"Write %s %s: mongodb error.The rows begining with %d will be skipped.",
+								db.getName(), collectionName.getStringValue(), rowNumber));
+						logger.error(e);
+					}
+				}
+			}.start();
+		}
+	}
 
 
 
@@ -169,7 +192,7 @@ public class MongoScriptNodeModel extends NodeModel {
 			throws Exception {
 		logger.debug("Starting mongo shell execution.");
 		if (noOp.getBooleanValue()) {
-			logger.warn("Mongodb copy: No Operation is true, so no execution.");
+			logger.warn("Mongodb script: No Operation is true, so no execution.");
 			return null; // EARLY EXIT
 		}
 
@@ -198,9 +221,8 @@ public class MongoScriptNodeModel extends NodeModel {
 							totalRows, dB2.getStringValue()));
 					cursor = db.getCollection(collectionName.getStringValue()).find(qo)
 							.sort(new BasicDBObject("$natural", 1)).skip(rowNumber).limit(OBJECT_BUFFER_SIZE);
-					// Some data is messed up
-//					objects = ensureUTF8(cursor.toArray());
 					objects = toArrayEnsureUTF8(cursor);
+//					writeData(db2, objects, rowNumber,logger);
 					try {
 						if (objects.size() > 0) {
 							db2.getCollection(collectionName.getStringValue()).insert(objects);
@@ -271,6 +293,8 @@ public class MongoScriptNodeModel extends NodeModel {
 	}
 
 	MongoClient newMongoClient(final String host,  final int port, final String db) {
+		final boolean autoConnect = true;
+		final int connectionTimeout = 10000;
 		logger.debug(String.format("Opening mongo client on %s : %s for ID %s.", host, port, mongoID.getStringValue()));
 		MongoClient mongoClient = null;
 		MongoCredential credential = null;
@@ -278,11 +302,11 @@ public class MongoScriptNodeModel extends NodeModel {
 			credential = MongoCredential.createMongoCRCredential(mongoID.getStringValue(),
 					db, mongoPassword.getStringValue().toCharArray());
 		}
-		final MongoClientOptions options = MongoClientOptions.builder().autoConnectRetry(true).build();
+		final MongoClientOptions options = MongoClientOptions.builder().autoConnectRetry(autoConnect)
+				.connectTimeout(connectionTimeout).build();
 		try {
 			if (credential != null) {
-				mongoClient = new MongoClient(new ServerAddress(host,
-						port), Arrays.asList(credential), options);
+				mongoClient = new MongoClient(new ServerAddress(host, port), Arrays.asList(credential), options);
 
 			} else {
 				mongoClient = new MongoClient(new ServerAddress(host,
