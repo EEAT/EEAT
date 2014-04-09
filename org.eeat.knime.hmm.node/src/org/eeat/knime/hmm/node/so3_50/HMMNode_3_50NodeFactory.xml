@@ -4,11 +4,13 @@
     <name>HMMNode_3_50</name>
     
     <shortDescription>
-        
+        The HMM node which takes three states and 50 observations. 
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>This node will take a stream of input and train them into one HMM model. 
+        The “3” in the node name means that there are 3 states in each HMM, 
+        and 50 means there are 50 different types of observation allowed in each HMM. </intro>
         
         
         <option name="short name of first option (like in the dialog)">description of first option</option>
@@ -26,7 +28,60 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
+        <inPort index="0" name="State Number Parameter">
+        A number to specify the number of states. This number is 3 and is fixed. You need a “java editable variable” node first, connecting to a “variable to table row” node. And you should connect this variable to table row node to the first port of HMM node. 
+			a.	In the java editable variable: set the flow variable as “numberOfSates”, type as int, java type Integer and Java field as out_number. And write this code: out_number = 3.
+			b. 	In the variable to table row node, select “numberOfStates” to include. 
+		</inPort>
+		
+		 <inPort index="1" name="Observation Number Parameter">
+		 A number to specify the number of observations. This number is 50 and is fixed. You need a “java editable variable” node first, connecting to a “variable to table row” node. And you should connect this variable to table row node to the second port of HMM node. 
+		a.	In the java editable variable: set the flow variable as “numberOfObservations”, type as int, java type Integer and Java field as out_number. And write this code: out_number = 50.
+		b.	In the variable to table row node, select “numberOfObservations” to include. 
+
+		</inPort>
+		
+		<inPort index="2" name="Initial State Matrix input port">
+		A CSV reader file to specify the “Initial State Matrix”. It should look like this:
+			0.33, 0.33, 0.34
+		This matrix specifies the initial probability for each state. 
+		Therefore, these three numbers should add up to 1. 
+		Note that you can only have three columns, because for this particular node, there are only three states allowed.  
+
+		</inPort>
+		
+		<inPort index="3" name="State Transmission matrix input port">
+		A CSV reader file to specify the “State Transmission Matrix”. It should look like this:
+		first row: 0.5	0.3	0.2
+		second row: 0.2	0.5	0.3
+		Third row: 0.2	0.3	0.5
+		This matrix specify the probability for each state to transit to another state. 
+		Therefore, this matrix has 3*3 cells. In the first row, the first three numbers mean the probability 
+		for state A to convert to state A, B, and C. 
+		Therefore, these three numbers should add up to 1. 		
+		</inPort>
+		
+		<inPort index="4" name="Emission Probability Matrix input port">
+		A CSV reader file to specify the “Emission Probability Matrix”. It should look like this
+		first row: a1,a2,a3……a50
+		second row:b1, b2,b3……b50
+		third row: c1, c2,c3……..c50
+		Note that you should have 3*50 columns. 
+		This matrix shows, when under state X(3 of them), the probability of each observation(event type).
+		 Therefore, numbers in the same row should add up to 1. 
+		</inPort>
+		
+		
+		<inPort index="5" name="Event Stream input port">
+		An input file which contain one column: a stream of events sorted by time. It should look like this 
+			1
+			2
+			3
+			2
+			4
+			5
+		</inPort>
+
         <!-- possibly more input ports here-->
         <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
         <!-- possibly more output ports here-->
