@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.8"?><target name="knime_2.10" sequenceNumber="14">
+<locations>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.knime.features.ext.itemset.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.ext.poi.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.r.feature.group" version="2.10.1.0043833"/>
+<unit id="org.knime.features.ext.weka_3.7.feature.group" version="2.10.1.0043833"/>
+<unit id="org.knime.features.ext.osm.feature.group" version="2.10.1.0043833"/>
+<unit id="org.knime.features.dbdrivers.feature.group" version="2.10.0.0043577"/>
+<unit id="org.knime.features.ext.webservice.client.ppilot.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.base.filehandling.feature.group" version="2.10.1.0043833"/>
+<unit id="org.knime.features.base.feature.group" version="2.10.1.0043860"/>
+<unit id="org.knime.features.exttool.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.base.treeensembles.feature.group" version="2.10.0.0043499"/>
+<unit id="org.knime.features.chem.types.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.network.distmatrix.feature.group" version="2.10.0.0042428"/>
+<unit id="org.knime.features.ext.jython.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.ext.textprocessing.feature.group" version="2.10.1.0043833"/>
+<unit id="org.knime.features.ext.chem.tools.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.network.feature.group" version="2.10.0.0043630"/>
+<unit id="org.knime.features.ext.perl.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.ext.r.bin.feature.group" version="3.0.3.0043833"/>
+<unit id="org.knime.features.ext.webservice.client.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.ext.jep.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.ext.dsread.feature.group" version="2.10.0.0043444"/>
+<unit id="org.knime.features.ext.md.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.ext.svg.feature.group" version="2.10.1.0043833"/>
+<unit id="org.knime.features.neighborgram.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.optimization.feature.group" version="2.10.0.0042428"/>
+<unit id="org.knime.features.ext.jfreechart.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.webanalytics.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.ext.spotfire.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.ext.exttool.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.distmatrix.feature.group" version="2.10.1.0043833"/>
+<unit id="org.knime.features.google.api.feature.group" version="2.10.1.0043833"/>
+<unit id="org.knime.features.xml.feature.group" version="2.10.0.0042428"/>
+<unit id="org.knime.features.jpmml.feature.group" version="2.10.0.0042431"/>
+<unit id="org.knime.features.virtual.feature.group" version="2.10.0.0043499"/>
+<unit id="org.knime.features.quickform.feature.group" version="2.10.0.0043499"/>
+<unit id="org.knime.features.ext.weka_3.6.feature.group" version="2.10.0.0043499"/>
+<unit id="org.knime.features.ext.libsvm.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.twitter.api.feature.group" version="2.10.1.0043833"/>
+<unit id="com.knime.features.reporting.designer.feature.group" version="2.10.1.0043833"/>
+<unit id="org.knime.features.datageneration.feature.group" version="2.10.0.0043500"/>
+<unit id="org.knime.features.ensembles.feature.group" version="2.10.0.0043614"/>
+<unit id="org.knime.features.js.feature.group" version="2.10.1.0043833"/>
+<unit id="org.knime.features.ext.lucene.feature.group" version="2.10.0.0042431"/>
+<unit id="org.knime.features.ext.birt.feature.group" version="2.10.0.0043500"/>
+<unit id="com.knime.features.enterprise.client.exampleserver.feature.group" version="2.10.0.0043496"/>
+<repository location="http://www.knime.org/update/2.10/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="ch.qos.logback.feature.feature.group" version="1.0.7"/>
+<unit id="org.slf4j.feature.feature.group" version="1.6.6"/>
+<repository location="http://logback.qos.ch/p2/"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.platform.ide" version="3.7.2.M20120208-0800"/>
+<repository location="http://download.eclipse.org/eclipse/updates/3.7"/>
+</location>
+</locations>
+<launcherArgs>
+<vmArgs>-ea -Xmx1G -XX:MaxPermSize=512M</vmArgs>
+</launcherArgs>
+</target>
