@@ -110,6 +110,7 @@ public class DroolsNodeModel extends NodeModel {
     	drools.setGlobalVariable(DROOLS_OBJECT, drools);
     	drools.setGlobalVariable(LOGGER, logger);
     	List<Object> dataList = transformData(inData,drools);
+    	double listSize = (double)dataList.size();
     	int i=1;
     	for (Object o : dataList) {
     		logger.debug(String.format("%d/%d In: %.140s", i++, dataList.size(),o.toString()));
@@ -121,7 +122,7 @@ public class DroolsNodeModel extends NodeModel {
 			}
 			// check if the execution monitor was canceled
 			exec.checkCanceled();
-			exec.setProgress(i / (double) dataList.size(), "Adding row " + i);
+			exec.setProgress(i / listSize, "Adding row " + i);
     	}
     	insertControlMessage(drools,"Data complete");
 		drools.execute();
@@ -259,11 +260,11 @@ public class DroolsNodeModel extends NodeModel {
     
     protected List<Object> transformData(final BufferedDataTable inData,
             final Drools drools) {
-    	logger.debug("Converting row data");
+    	logger.debug("Converting data rows: " + inData.getRowCount());
     	ArrayList<Object> list = new ArrayList<Object>();
     	int i = 1; 
 		for (DataRow row : inData) {
-			logger.debug(String.format("Transforming row: %s",i++));
+			//logger.debug(String.format("Transforming row: %s",i++));
 			list.add(rowToObject(row, inData.getDataTableSpec(), drools));
         }			
 		return list;

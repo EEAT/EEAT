@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.eeat.drools.rbs;singleton:=true
 Bundle-Version: 3.0.0.qualifier
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
  ./,
  target/classes/,
