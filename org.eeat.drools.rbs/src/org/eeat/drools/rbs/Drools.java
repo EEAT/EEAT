@@ -84,7 +84,9 @@ public class Drools {
 		if (path.contains(":")) {
 			resource = ResourceFactory.newFileResource(path);
 		} else {
-			resource = ResourceFactory.newClassPathResource(path, this.getClass());
+			//resource = ResourceFactory.newClassPathResource(path, this.getClass());
+			// Use default load, don't specify this loader.
+			resource = ResourceFactory.newClassPathResource(path);
 		}
 		if (path.endsWith("changeset.xml")) {
 			// TODO If xml-apis.jar is in classpath, then CHANGE_SET fails...
