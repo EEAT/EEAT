@@ -31,8 +31,7 @@ Bundle-ClassPath: .,
  target/dependency/jta-1.1.jar,
  target/dependency/jxl-2.6.10.jar,
  target/dependency/protobuf-java-2.4.1.jar,
- target/dependency/stringtemplate-3.2.jar,
- resources/
+ target/dependency/stringtemplate-3.2.jar
 Import-Package: org.osgi.framework;version="1.6.0",
  org.osgi.service.log;version="1.3.0"
 Require-Bundle: org.eeat.core;bundle-version="3.0.0",

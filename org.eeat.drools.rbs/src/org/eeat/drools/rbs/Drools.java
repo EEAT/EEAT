@@ -85,7 +85,7 @@ public class Drools {
 			resource = ResourceFactory.newFileResource(path);
 		} else {
 			//resource = ResourceFactory.newClassPathResource(path, this.getClass());
-			// Use default load, don't specify this loader.
+			// Use default load, don't specify this loader. 
 			resource = ResourceFactory.newClassPathResource(path);
 		}
 		if (path.endsWith("changeset.xml")) {
