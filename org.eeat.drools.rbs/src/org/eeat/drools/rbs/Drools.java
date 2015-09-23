@@ -57,7 +57,7 @@ public class Drools {
 	// Used for minimal start
 	final String resourceFolder = "/resources";
 
-	final String loadFile = resourceFolder + "/repository/load-changeset.xml";
+	final String loadFile = resourceFolder + "/repository/property.drl";
 
 	private String droolsResourceFile;
 
@@ -80,26 +80,34 @@ public class Drools {
 				.newKnowledgeBuilderConfiguration(kbuilderProperties, null);
 		final KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory
 				.newKnowledgeBuilder(builderConf);
+		logger.debug("Trying to add rule package: " + path);
 		Resource resource;
-		if (path.contains(":")) {
-			resource = ResourceFactory.newFileResource(path);
-		} else {
-			//resource = ResourceFactory.newClassPathResource(path, this.getClass());
-			// Use default load, don't specify this loader. 
-			resource = ResourceFactory.newClassPathResource(path);
+		resource = ResourceFactory.newFileResource(path);
+		try {
+			resource.getInputStream();
+		} catch (IOException e) {
+			// Not found as a file resource
+			resource = null;
+		}
+		if (resource == null) {
+			resource = ResourceFactory.newClassPathResource(path, this.getClass());
 		}
 		if (path.endsWith("changeset.xml")) {
-			// TODO If xml-apis.jar is in classpath, then CHANGE_SET fails...
+			logger.warn("Change-set being depcreated in Drools v6... trying to load Drools resource file: "
+					+ resource.toString());
 			knowledgeBuilder.add(resource, ResourceType.CHANGE_SET);
 		} else {
 			knowledgeBuilder.add(resource, ResourceType.DRL);
 		}
 		if (knowledgeBuilder.hasErrors()) {
+			logger.error("Cannot load Drools resource file: " + resource.toString());
 			throw new RuntimeException(knowledgeBuilder.getErrors().toString());
 		}
 		knowledgeBase.addKnowledgePackages(knowledgeBuilder.getKnowledgePackages());
 		logger.info("Added rule package: " + path);
 	}
+	
+	
 
 	public void close() {
 		logger.debug("closing: " + this);
