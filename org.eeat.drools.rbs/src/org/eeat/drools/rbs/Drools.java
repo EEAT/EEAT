@@ -1,5 +1,6 @@
 package org.eeat.drools.rbs;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -87,24 +88,29 @@ public class Drools {
 			resource.getInputStream();
 		} catch (IOException e) {
 			// Not found as a file resource
+			logger.debug("Rule resource not found in file system: " + path);
 			resource = null;
 		}
 		if (resource == null) {
 			resource = ResourceFactory.newClassPathResource(path, this.getClass());
-		}
-		if (path.endsWith("changeset.xml")) {
-			logger.warn("Change-set being depcreated in Drools v6... trying to load Drools resource file: "
-					+ resource.toString());
-			knowledgeBuilder.add(resource, ResourceType.CHANGE_SET);
-		} else {
-			knowledgeBuilder.add(resource, ResourceType.DRL);
-		}
+		}		
+		try {
+			if (path.endsWith("changeset.xml")) {
+				logger.warn("Change-set being depcreated in Drools v6... trying to load Drools resource file: "
+						+ resource.toString());
+				knowledgeBuilder.add(resource, ResourceType.CHANGE_SET);
+			} else {
+				knowledgeBuilder.add(resource, ResourceType.DRL);
+			}
+			knowledgeBase.addKnowledgePackages(knowledgeBuilder.getKnowledgePackages());
+			logger.info("Added rule package: " + path);
+		} catch (RuntimeException e) {
+			logger.error("While adding rule resource: '" + path + "' exception: " + e.toString());
+		}		
 		if (knowledgeBuilder.hasErrors()) {
 			logger.error("Cannot load Drools resource file: " + resource.toString());
 			throw new RuntimeException(knowledgeBuilder.getErrors().toString());
 		}
-		knowledgeBase.addKnowledgePackages(knowledgeBuilder.getKnowledgePackages());
-		logger.info("Added rule package: " + path);
 	}
 	
 	
@@ -117,7 +123,8 @@ public class Drools {
 	}
 
 	public void closeAudit() {
-		droolsLogger.close();
+		if (droolsLogger != null)
+			droolsLogger.close();
 	}
 
 	public void execute() {
@@ -169,12 +176,20 @@ public class Drools {
 		if ((logFilename == null) || logFilename.isEmpty()) {
 			logFilename = bundleProperties.getProperty(DROOLS_AUDIT);
 			if ((logFilename == null) || logFilename.isEmpty()) {
-				logger.warn("Running without Drools logfile. No log file set in bundle.properties.");
+				
 				logFilename = System.getProperty("java.io.tmpdir") + DROOLS_AUDIT;
 			}
 		}
-		newLogger = KnowledgeRuntimeLoggerFactory.newFileLogger(session, logFilename);
-		logger.info("Drools logging to file: " + logFilename);
+		if ((logFilename != null) && !logFilename.isEmpty()) {
+			File logfile = new File(logFilename);
+			if (logfile.canWrite()) {
+				newLogger = KnowledgeRuntimeLoggerFactory.newFileLogger(session, logFilename);
+				logger.info("Drools logging to file: " + logFilename);
+			}
+			else {
+				logger.error("Cannot write to Drools logging to file: " + logFilename);
+			}
+		}
 		return newLogger;
 	}
 
