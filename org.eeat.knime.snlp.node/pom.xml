@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.eeat</groupId>
+		<artifactId>org.eeat.parent</artifactId>
+		<version>3.0.0-SNAPSHOT</version>
+		<relativePath>../org.eeat.parent/pom.xml
+		</relativePath>
+	</parent>
+	<artifactId>org.eeat.knime.snlp.node</artifactId>
+	<description>EEAT Stanford NLP parser node</description>
+	<packaging>eclipse-plugin</packaging>
+	<version>1.0.0-SNAPSHOT</version>
+	<dependencies>
+		<dependency>
+			<groupId>edu.stanford.nlp</groupId>
+			<artifactId>stanford-corenlp</artifactId>
+			<version>3.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>edu.stanford.nlp</groupId>
+			<artifactId>stanford-corenlp</artifactId>
+			<version>3.5.2</version>
+			<classifier>models</classifier>
+		</dependency>
+		<dependency>
+			<groupId>edu.stanford.nlp</groupId>
+			<artifactId>stanford-parser</artifactId>
+			<version>3.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j.impl</groupId>
+			<artifactId>slf4j-osgi</artifactId>
+			<version>1.6.6</version>
+		</dependency>
+	</dependencies>
+</project>

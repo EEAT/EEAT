@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+  <extension
+         point="org.knime.workbench.repository.categories">
+      <category
+            description="EEAT"
+            icon="eeat2.png"
+            level-id="EEAT"
+            name="EEAT"
+            path="/">
+      </category>
+   </extension>
+   
+   <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            category-path="/EEAT"
+            factory-class="org.eeat.knime.snlp.node.SnlpNodeFactory"
+            id="org.eeat.knime.snlp.node.SnlpNodeFactory"/>
+   </extension>
+   
+</plugin>

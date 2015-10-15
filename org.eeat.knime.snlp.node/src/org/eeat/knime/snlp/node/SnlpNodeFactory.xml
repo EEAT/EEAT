@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+    <name>SNLP</name>
+    
+    <shortDescription>
+        Process a table using Stanford (neural-network) dependency parser. Output is a single table.
+    </shortDescription>
+    
+    <fullDescription>    
+        <intro>
+        Process a table using  <a href="http://nlp.stanford.edu/software/nndep.shtml">Stanford (neural-network) dependency parser</a>. Output is a single table.
+        <ul>
+        <li>Input is added to the parser. Only first column is processed. Each cell in the column is considered text, which is divided into sentences and processed.</li>
+
+        <li>Output is in a table of words.
+        Each word is in a table row, which includes columns for sentence number and row number. The row number refers to the row in the input. The sentence number references to the sentence in the input.
+        Note that the first row (cell 0), may have multiple sentences.
+        The remaining columns are from the Stanford dependency parser. They include:
+        </li>
+        </ul>
+        <ol>
+        <li>Rel - Relationship</li>
+        <li>Gov - </li>
+        <li>GovIdx - index of Gov</li>
+        <li>Gov Tag -</li>
+        <li>Dep - dependency</li>
+        <li>DepIdx - index of Dep</li>
+        <li>DepTag - </li>
+        <li>SentNum - Sentence number</li>
+        <li>RowNum - Row number</li>        
+        </ol>
+        </intro>            
+        
+        
+        <!-- possibly more options that can also be grouped by tabs -->
+        <!--
+        <tab name="Standard Options">
+            <option name="short name of first option (like in the dialog)">description of first option</option>
+            <option name="short name of second option (like in the dialog)">description of second option</option>
+        </tab>
+        <tab name="Advanced Options">
+            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
+        </tab>
+        -->
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="In-Port name">Input data must be one column, where each cell is text (of arbitrary length).</inPort>
+        <!-- possibly more input ports here-->
+        <outPort index="0" name="Out-Port name">Output data is rows of dependency information.</outPort>
+        <!-- possibly more output ports here-->
+    </ports>    
+    <views>
+        <view index="0" name="No view yet">Open using the default view.</view>
+        <!--view index="1" name="name of second view">Description of second view...</view-->
+    </views>
+</knimeNode>
