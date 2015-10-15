@@ -20,6 +20,6 @@ Bundle-ClassPath: .,
  ./,
  target/classes/,
  target/dependency/slf4j-osgi-1.6.6.jar,
- target/dependency/stanford-corenlp-3.5.2.jar,
+ target/dependency/stanford-corenlp-3.5.2-models.jar,
  target/dependency/stanford-parser-3.5.2.jar,
- target/dependency/stanford-corenlp-3.5.2-models.jar
+ target/dependency/stanford-corenlp-3.5.2.jar
