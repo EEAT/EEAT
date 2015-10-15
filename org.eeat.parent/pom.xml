@@ -53,6 +53,7 @@
 		<module>../org.eeat.knime.drools.node</module>
 		<module>../org.eeat.knime.mongo.node</module>
 		<module>../org.eeat.knime.mongo.script.node</module>
+		<module>../org.eeat.knime.snlp.node</module>
 		
 		<module>../org.eeat.knime.git.commentprinter</module>
 		<module>../org.eeat.knime.git.issuecommentprinter</module>
@@ -64,7 +65,8 @@
 		<module>../org.eeat.knime.hmm.feature</module>
 		<module>../org.eeat.knime.decisiontree.feature</module>
 		<module>../org.eeat.knime.connector.feature</module>
-		<module>../org.eeat.knime.drools.feature</module>		
+		<module>../org.eeat.knime.drools.feature</module>
+		<module>../org.eeat.knime.nlp.feature</module>		
 
 		<!-- site -->
 		<module>../org.eeat.updatesite</module>	
