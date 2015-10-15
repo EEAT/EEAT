@@ -15,6 +15,9 @@
    <feature url="features/org.eeat.knime.drools.feature_3.0.0.qualifier.jar" id="org.eeat.knime.drools.feature" version="3.0.0.qualifier">
       <category name="KNIME_Drools"/>
    </feature>
+   <feature url="features/org.eeat.knime.nlp.feature_1.0.0.qualifier.jar" id="org.eeat.knime.nlp.feature" version="1.0.0.qualifier">
+      <category name="KNIME_NLP"/>
+   </feature>
    <category-def name="plugins" label="plugins">
       <description>
          Pluigns, mostly for the server.
@@ -36,4 +39,9 @@
    <category-def name="KNIME_DT" label="KNIME Decision Tree"/>
    <category-def name="KNIME_Connector" label="KNIME Connector"/>
    <category-def name="KNIME_Drools" label="KNIME_Drools"/>
+   <category-def name="KNIME_NLP" label="KNIME_NLP">
+      <description>
+         NLP nodes
+      </description>
+   </category-def>
 </site>
