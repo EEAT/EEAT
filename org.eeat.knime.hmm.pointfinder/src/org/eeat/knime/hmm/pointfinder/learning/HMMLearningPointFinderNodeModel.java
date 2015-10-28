@@ -142,7 +142,7 @@ public class HMMLearningPointFinderNodeModel extends NodeModel {
 
 			dataRow = itr.next();
 
-			logger.info("THE row for creating HMM:" + dataRow);
+			logger.debug("THE row for creating HMM:" + dataRow);
 
 			DataCell dataCell = dataRow.getCell(0);
 			DataCell dataCel2 = dataRow.getCell(1);
@@ -155,16 +155,16 @@ public class HMMLearningPointFinderNodeModel extends NodeModel {
 			DataCell dataCel9 = dataRow.getCell(8);
 			DataCell dataCel10 = dataRow.getCell(9);
 
-			logger.info("Pi_A:" + dataCell.toString());
-			logger.info("Pi_B:" + dataCel2.toString());
-			logger.info("A->A:" + dataCel3.toString());
-			logger.info("A->B:" + dataCel4.toString());
-			logger.info("B->A:" + dataCel5.toString());
-			logger.info("B->B:" + dataCel6.toString());
-			logger.info("A->Read:" + dataCel7.toString());
-			logger.info("A->Compose:" + dataCel8.toString());
-			logger.info("B->Read:" + dataCel9.toString());
-			logger.info("B->Compose:" + dataCel10.toString());
+			logger.debug("Pi_A:" + dataCell.toString());
+			logger.debug("Pi_B:" + dataCel2.toString());
+			logger.debug("A->A:" + dataCel3.toString());
+			logger.debug("A->B:" + dataCel4.toString());
+			logger.debug("B->A:" + dataCel5.toString());
+			logger.debug("B->B:" + dataCel6.toString());
+			logger.debug("A->Read:" + dataCel7.toString());
+			logger.debug("A->Compose:" + dataCel8.toString());
+			logger.debug("B->Read:" + dataCel9.toString());
+			logger.debug("B->Compose:" + dataCel10.toString());
 
 			hmm = new Hmm<ObservationDiscrete<Observation>>(2,
 					new OpdfDiscreteFactory<Observation>(Observation.class));
@@ -261,8 +261,8 @@ public class HMMLearningPointFinderNodeModel extends NodeModel {
 		    
 	    	//	    	System.out.println(g);
 	    	
-	    	logger.info("the index of weeks");
-	    	logger.info(g);
+	    	logger.debug("the index of weeks");
+	    	logger.debug(g);
 	    	
 	    }	  
 	    

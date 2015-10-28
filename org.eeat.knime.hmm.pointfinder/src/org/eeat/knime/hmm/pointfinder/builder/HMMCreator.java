@@ -48,13 +48,13 @@ public class HMMCreator {
 			hmm.setAij(1, 0, Constant.STATE_B_STATE_A);
 			hmm.setAij(1, 1, Constant.STATE_B_STATE_B);
 			
-			logger.info("LENGHTTTTTTTTTTFFFFF:" + sequenceList.get(0).size());
+			logger.debug("LENGHTTTTTTTTTTFFFFF:" + sequenceList.get(0).size());
 
 			List<List<ObservationDiscrete<Observation>>> sequence = OptimizeHMM
 					.createSequence(sequenceList.get(0));
 
-			logger.info("BEFORE OPTIMIZE:" + hmm);
-			logger.info("LENGHTTTTTTTTTT:" + sequence.get(0).size());
+			logger.debug("BEFORE OPTIMIZE:" + hmm);
+			logger.debug("LENGHTTTTTTTTTT:" + sequence.get(0).size());
 			
 			hmm = OptimizeHMM.optimizeHMM(hmm, sequence);
 

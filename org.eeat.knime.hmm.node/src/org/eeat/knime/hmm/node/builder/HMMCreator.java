@@ -59,7 +59,7 @@ public class HMMCreator {
 				}
 			}
 			
-			logger.info("LENGHTTTTTTTTTTFFFFF:" + sequenceList.get(0).size());
+			logger.debug("LENGHTTTTTTTTTTFFFFF:" + sequenceList.get(0).size());
 
 //			List<List<ObservationDiscrete<Observation2>>> sequence = OptimizeHMM
 //					.createSequence(sequenceList.get(0));
@@ -356,8 +356,8 @@ public class HMMCreator {
 			sequences.add(listObs);			
 			
 
-			logger.info("BEFORE OPTIMIZE:" + hmm);
-			logger.info("LENGHTTTTTTTTTT:" + sequences.get(0).size());
+			logger.debug("BEFORE OPTIMIZE:" + hmm);
+			logger.debug("LENGHTTTTTTTTTT:" + sequences.get(0).size());
 			
 //			hmm = OptimizeHMM.optimizeHMM(hmm, sequences);
 			
@@ -371,15 +371,15 @@ public class HMMCreator {
 			
 			try {
 				
-				logger.info("SEQUENCE:" + sequences.size());
+				logger.debug("SEQUENCE:" + sequences.size());
 				
 				for (ObservationDiscrete<Observation50> k:sequences.get(0)) 
-					logger.info("TTTTTTTTTTTTTT" + k.value);
+					logger.debug("TTTTTTTTTTTTTT" + k.value);
 			
 			for (int i = 0; i < 10; i++) {
 
-		//		logger.info("IIIII:" + i);
-				logger.info("LEARNT HMM:" + learntHmm);
+		//		logger.debug("IIIII:" + i);
+				logger.debug("LEARNT HMM:" + learntHmm);
 				
 				learntHmm = bwl.iterate(learntHmm, sequences);
 			//	learntHmm = bwl.learn(hmm, sequences);
@@ -390,8 +390,8 @@ public class HMMCreator {
 			} catch (Exception ex) {
 				
 				//when sequence too short throows exception
-				logger.info(ex);
-				logger.info("SHOOOOOOOOOOOOOOOOOOOORTTTTTTTTTT" + sequences.get(0).size());
+				logger.debug(ex);
+				logger.debug("SHOOOOOOOOOOOOOOOOOOOORTTTTTTTTTT" + sequences.get(0).size());
 				return hmm;
 				
 			}
