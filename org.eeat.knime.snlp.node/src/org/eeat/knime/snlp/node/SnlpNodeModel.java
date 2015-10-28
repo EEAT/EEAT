@@ -3,6 +3,7 @@ package org.eeat.knime.snlp.node;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import edu.stanford.nlp.ling.HasWord;
@@ -45,17 +47,20 @@ public class SnlpNodeModel extends NodeModel {
 
 	static final String CFG_PARSER_TYPE = "snlpParserType";
 	private static final NodeLogger logger = NodeLogger.getLogger(SnlpNodeModel.class);
-	public final String LOGGER = "logger";
-	// Stanford parser parameters. 
-	protected String taggerPath = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
-	protected final String[] outputColumnNames = { "Rel", "Gov", "GovIdx", "GovTag", "Dep", "DepIdx", "DepTag", "SentNum", "RowNum" };
 	// TODO Consider adding multiple parsers for user selection.
-	static public final String[] parserTypes = {"Dependency", "ShiftReduce"};
+	static public final String[] parserTypes = { "Dependency", "ShiftReduce" };
+	static public final String CFG_MAX_SENTENCE_LENGTH = "snlpMaxSentenceLength";
+	public final String LOGGER = "logger";
+	// Stanford parser parameters.
+	protected String taggerPath = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
 
+	protected final String[] outputColumnNames = { "Rel", "Gov", "GovIdx", "GovTag", "Dep", "DepIdx", "DepTag",
+			"SentNum", "RowNum" };
+
+	protected final SettingsModelString userParserType = new SettingsModelString(CFG_PARSER_TYPE, null);
 	
-
-	protected final SettingsModelString userParserType = new SettingsModelString(
-			CFG_PARSER_TYPE, null);
+	protected final SettingsModelInteger  userMaxSentenceLength = new SettingsModelInteger(
+			CFG_MAX_SENTENCE_LENGTH, 8192);
 
 	/**
 	 * Constructor for the node model.
@@ -65,10 +70,9 @@ public class SnlpNodeModel extends NodeModel {
 		// one incoming port and one outgoing port
 		super(1, 1);
 	}
-	
 
-	protected BufferedDataTable collectSnlpResults(final List<List<String>> relations,
-			final ExecutionContext exec) throws CanceledExecutionException {
+	protected BufferedDataTable collectSnlpResults(final List<List<String>> relations, final ExecutionContext exec)
+			throws CanceledExecutionException {
 		BufferedDataTable out = null;
 		DataTableSpec outputSpec = createTableSpec();
 		BufferedDataContainer container = exec.createDataContainer(outputSpec);
@@ -90,8 +94,7 @@ public class SnlpNodeModel extends NodeModel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
-			throws InvalidSettingsException {
+	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 
 		// TODO: check if user settings are available, fit to the incoming
 		// table structure, and the incoming types are feasible for the node
@@ -138,11 +141,17 @@ public class SnlpNodeModel extends NodeModel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
-			final ExecutionContext exec) throws Exception {
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec)
+			throws Exception {
 
 		BufferedDataTable out = processWithSnlp(inData[0], exec);
 		return new BufferedDataTable[] { out };
+	}
+
+	protected List<String> formatDepenency() {
+		List<String> list;
+		list = Arrays.asList("", "", "0", "", "", "0", "");
+		return new ArrayList<String>(list);
 	}
 
 	protected List<String> formatDepenency(TypedDependency dependency) {
@@ -177,13 +186,13 @@ public class SnlpNodeModel extends NodeModel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		userParserType.loadSettingsFrom(settings);
+	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+//		userParserType.loadSettingsFrom(settings);
+		userMaxSentenceLength.loadSettingsFrom(settings);
 	}
 
-	protected BufferedDataTable processWithSnlp(final BufferedDataTable inData,
-			final ExecutionContext exec) throws CanceledExecutionException {
+	protected BufferedDataTable processWithSnlp(final BufferedDataTable inData, final ExecutionContext exec)
+			throws CanceledExecutionException {
 		logger.debug("Begin processing Snlp node.");
 		List<List<String>> resultRelations = new ArrayList<List<String>>();
 		MaxentTagger tagger = new MaxentTagger(taggerPath);
@@ -192,19 +201,41 @@ public class SnlpNodeModel extends NodeModel {
 		double listSize = dataList.size();
 		int rowNum = 0;
 		for (String rowItem : dataList) {
-			DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(rowItem));
+			// Ensure reasonable character set.
+			String rowUT8 = new String(rowItem.getBytes(StandardCharsets.UTF_8));
+			DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(rowUT8));
 			int sentNum = 0;
 			for (List<HasWord> sentence : tokenizer) {
-				List<TaggedWord> tagged = tagger.tagSentence(sentence);
-				GrammaticalStructure gs = parser.predict(tagged);
-				for (TypedDependency dep : gs.allTypedDependencies()) {
-					ArrayList<String> relation = (ArrayList<String>) formatDepenency(dep);
-					relation.add(String.format("%d", sentNum));
-					relation.add(String.format("%d", rowNum));
-					resultRelations.add(relation);
-				}				
-				// Print typed dependencies
-				logger.debug(gs);
+				try {
+					logger.debug(String.format("IN: row #%d sent#%d, length:%d: %s", rowNum, sentNum,
+							sentence.toString().length(), sentence));
+					if (sentence.toString().length() < userMaxSentenceLength.getIntValue()) {
+						List<TaggedWord> tagged = tagger.tagSentence(sentence);
+						GrammaticalStructure gs = parser.predict(tagged);
+						for (TypedDependency dep : gs.allTypedDependencies()) {
+							ArrayList<String> relation = (ArrayList<String>) formatDepenency(dep);
+							relation.add(String.format("%d", sentNum));
+							relation.add(String.format("%d", rowNum));
+							resultRelations.add(relation);
+						}
+						// Print typed dependencies
+						logger.debug(String.format("OUT: row #%d sent#%d: %s", rowNum, sentNum, gs));
+					} else {
+						logger.error(String.format("Sentence length execeeds maximum: %d > %d. ",
+								sentence.toString().length(), userMaxSentenceLength.getIntValue()));
+						// Add empty sentence
+						ArrayList<String> relation = (ArrayList<String>) formatDepenency();
+						relation.add(String.format("%d", sentNum));
+						relation.add(String.format("%d", rowNum));
+						resultRelations.add(relation);
+					}
+
+				} catch (StackOverflowError e) {
+					// In case the above check for bad input doesn't work.
+					logger.error(e.toString());
+					// FIX: Nothing hereafter executes after StackOverflowError
+					System.gc();
+				}
 				sentNum++;
 			}
 			// check if the execution monitor was canceled
@@ -247,7 +278,8 @@ public class SnlpNodeModel extends NodeModel {
 	 */
 	@Override
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
-		userParserType.saveSettingsTo(settings);
+//		userParserType.saveSettingsTo(settings);
+		userMaxSentenceLength.saveSettingsTo(settings);
 	}
 
 	/**
@@ -256,7 +288,8 @@ public class SnlpNodeModel extends NodeModel {
 	@Override
 	protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
 		// Do not actually set any values of any member variables.
-		userParserType.validateSettings(settings);
+//		userParserType.validateSettings(settings);
+		userMaxSentenceLength.validateSettings(settings);
 
 	}
 

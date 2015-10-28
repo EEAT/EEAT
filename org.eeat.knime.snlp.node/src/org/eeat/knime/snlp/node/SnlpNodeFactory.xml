@@ -33,11 +33,11 @@
         
         
         <!-- possibly more options that can also be grouped by tabs -->
-        <!--
+
         <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
+            <option name="Max sentence length">Sentences longer than max sentence length will not be parsed. A blank row will be output.</option>
         </tab>
+        <!--
         <tab name="Advanced Options">
             <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
         </tab>

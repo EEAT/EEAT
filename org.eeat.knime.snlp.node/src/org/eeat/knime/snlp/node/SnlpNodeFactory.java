@@ -53,8 +53,7 @@ public class SnlpNodeFactory
     @Override
     public NodeDialogPane createNodeDialogPane() {
         // TODO Add dialog for multiple parsers
-    	// return new SnlpNodeDialog();
-        return new DefaultNodeSettingsPane();
+    	return new SnlpNodeDialog();
     }
 
 }

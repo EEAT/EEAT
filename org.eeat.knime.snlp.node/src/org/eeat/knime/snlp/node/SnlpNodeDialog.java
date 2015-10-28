@@ -1,8 +1,8 @@
 package org.eeat.knime.snlp.node;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 
 /**
  * <code>NodeDialog</code> for the "Drools" Node.
@@ -24,11 +24,13 @@ public class SnlpNodeDialog extends DefaultNodeSettingsPane {
 		super();
 
 		createNewGroup("Standford parser");
-		final DialogComponentStringSelection snlpConf = new DialogComponentStringSelection(
-				new SettingsModelString(SnlpNodeModel.CFG_PARSER_TYPE, null),
-				"Stanford parser",
-				SnlpNodeModel.parserTypes);
-		snlpConf.setToolTipText("Select the Stanford parser type");
-		addDialogComponent(snlpConf);
+//		final DialogComponentStringSelection snlpConf = new DialogComponentStringSelection(
+//				new SettingsModelString(SnlpNodeModel.CFG_PARSER_TYPE, null),
+//				"Stanford parser",
+//				SnlpNodeModel.parserTypes);
+//		snlpConf.setToolTipText("Select the Stanford parser type");
+//		addDialogComponent(snlpConf);
+        addDialogComponent(new DialogComponentNumber(new SettingsModelInteger(
+        		SnlpNodeModel.CFG_MAX_SENTENCE_LENGTH, 4096), "Max sentence length: ", 1));		
 	}
 }
