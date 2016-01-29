@@ -3,6 +3,7 @@ package org.eeat.knime.snlp.node;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -201,9 +202,13 @@ public class SnlpNodeModel extends NodeModel {
 		double listSize = dataList.size();
 		int rowNum = 0;
 		for (String rowItem : dataList) {
-			// Ensure reasonable character set.
-			String rowUT8 = new String(rowItem.getBytes(StandardCharsets.UTF_8));
-			DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(rowUT8));
+			// Don't process empty rows
+			if (rowItem.length()<=0) continue;
+			
+			// Ensure reasonable character set.			
+			String inputString;
+			inputString = new String(rowItem.getBytes(StandardCharsets.US_ASCII));
+			DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(inputString));
 			int sentNum = 0;
 			for (List<HasWord> sentence : tokenizer) {
 				try {
@@ -230,9 +235,10 @@ public class SnlpNodeModel extends NodeModel {
 						resultRelations.add(relation);
 					}
 
-				} catch (StackOverflowError e) {
+				} catch (Exception | StackOverflowError e) {
 					// In case the above check for bad input doesn't work.
 					logger.error(e.toString());
+					logger.error("Input: " + inputString);
 					// FIX: Nothing hereafter executes after StackOverflowError
 					System.gc();
 				}
