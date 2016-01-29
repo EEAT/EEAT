@@ -289,9 +289,8 @@ public class DroolsNodeModel extends NodeModel {
 		return obj;
     }
     
-    protected Object rowToObject(DataRow row, DataTableSpec dataTableSpec, final Drools drools) {
-		FactType objectType = drools.getRuleKnowledgeBase().getFactType(KNIME_PACKAGE,
-				KNIME_ROW_IN);
+	protected Object rowToObject(DataRow row, DataTableSpec dataTableSpec, final Drools drools) {
+		FactType objectType = drools.getRuleKnowledgeBase().getFactType(KNIME_PACKAGE, KNIME_ROW_IN);
 		Object obj = null;
 		int i = 0;
 		try {
@@ -304,53 +303,61 @@ public class DroolsNodeModel extends NodeModel {
 			e.printStackTrace();
 		}
 		try {
-		// Set key value...
-		objectType.set(obj,KNIME_ROW_OUT_KEY,row.getKey().getString());
-		}
-		catch (NullPointerException npe) {
+			// Set key value...
+			objectType.set(obj, KNIME_ROW_OUT_KEY, row.getKey().getString());
+		} catch (NullPointerException npe) {
 			logger.error(npe.toString());
 			logger.error("...check that the KNIME input Class has a field for the key named: " + KNIME_ROW_OUT_KEY);
 		}
 		Iterator<DataCell> itr = row.iterator();
 		while (itr.hasNext()) {
 			DataCell cell = itr.next();
-			DataType type = cell.getType();
-			String columnName = dataTableSpec.getColumnSpec(i++).getName();
+			String columnName = dataTableSpec.getColumnSpec(i).getName();
+			DataColumnSpec columnSpec = dataTableSpec.getColumnSpec(i);
 			String v = cell.toString();
-			//logger.debug(String.format("Name: %s, value: %s",columnName,v));
-			try {
-				// WARNING: cell names must match Class field names
-				if (type.toString().equals("StringCell")) {
-					objectType.set(obj, columnName, v);
-				} else if (cell.isMissing() || v.length() <= 0) {
-					// Do nothing
-				} else if (type.toString().equals("IntCell")) {
-					objectType.set(obj, columnName, Integer.valueOf(v));
-				} else if (type.toString().equals("LongCell")) {
-					objectType.set(obj, columnName, Long.valueOf(v));
-					//logger.debug(String.format("Long column: %s of type %s with value %s",columnName, type,v));
-				} else if (type.toString().equals("DoubleCell")) {
-					objectType.set(obj, columnName, Double.valueOf(v));
-				} else if (type.toString().equals("TimestampCell")) {
-					objectType.set(obj, columnName, Timestamp.valueOf(v));
-				} else {
-					logger.warn(String.format("Unknown type while casting column: %s of type %s with value %s",
-							columnName, type,v));
-					objectType.set(obj, columnName, v);
-				}
-			} catch (ClassCastException e) {
-				logger.error(e.toString());
-				logger.error(String.format("Class cast error while casting column: %s of type %s with value %s",
-						columnName, type,v));
-				logger.error(String.format("... check that the data column type is the same as the Class field type."));
-			} catch (NullPointerException e) {
-				logger.error(e.toString());
-				logger.error("The column names and Class fields may have a mismatch, while setting column: "
-						+ columnName);
-				logger.error("...check that the Class has the field and its name is a match with the data column");
+			// logger.debug(String.format("Name: %s, value: %s",columnName,v));
+			if (cell.isMissing() || v.length() <= 0) {
+				// Do nothing
+			} else {
+				setObjectType(objectType, obj, columnSpec, columnName, v);
 			}
+			i = i+1;
 		}
 		return obj;
+	}
+    
+    Object setObjectType(FactType objectType, Object obj, DataColumnSpec columnSpec, String columnName, String value) {
+    	DataType type = columnSpec.getType();
+    	String typeName = type.toString();
+		try {
+			// WARNING: cell names must match Class field names
+			if (type.toString().equals("StringCell")) {
+				objectType.set(obj, columnName, value);
+			} else if (type.toString().equals("IntCell")) {
+				objectType.set(obj, columnName, Integer.valueOf(value));
+			} else if (type.toString().equals("LongCell")) {
+				objectType.set(obj, columnName, Long.valueOf(value));
+			} else if (type.toString().equals("DoubleCell")) {
+				objectType.set(obj, columnName, Double.valueOf(value));
+			} else if (type.toString().equals("TimestampCell")) {
+				objectType.set(obj, columnName, Timestamp.valueOf(value));
+			} else {
+				logger.warn(String.format("Unknown type while casting column: %s of type %s with value %s",
+						columnName, type,value));
+				objectType.set(obj, columnName, value);
+			}
+		} catch (ClassCastException e) {
+			logger.error(e.toString());
+			logger.error(String.format("Class cast error while casting column: %s of type %s with value %s",
+					columnName, type,value));
+			logger.error(String.format("... check that the data column type is the same as the Class field type."));
+		} catch (NullPointerException e) {
+			logger.error(e.toString());
+			logger.error("The column names and Class fields may have a mismatch, while setting column: "
+					+ columnName);
+			logger.error("...check that the Class has the field and its name is a match with the data column");
+		}
+    	return obj;
     }
     
 
