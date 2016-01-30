@@ -328,18 +328,18 @@ public class DroolsNodeModel extends NodeModel {
     
     Object setObjectType(FactType objectType, Object obj, DataColumnSpec columnSpec, String columnName, String value) {
     	DataType type = columnSpec.getType();
-    	String typeName = type.toString();
+    	Class<? extends DataCell> typeClass = type.getCellClass();
 		try {
 			// WARNING: cell names must match Class field names
-			if (type.toString().equals("StringCell")) {
+			if (typeClass.equals(StringCell.class)) {
 				objectType.set(obj, columnName, value);
-			} else if (type.toString().equals("IntCell")) {
+			} else if (typeClass.equals(IntCell.class)) {
 				objectType.set(obj, columnName, Integer.valueOf(value));
-			} else if (type.toString().equals("LongCell")) {
+			} else if (typeClass.equals(LongCell.class)) {
 				objectType.set(obj, columnName, Long.valueOf(value));
-			} else if (type.toString().equals("DoubleCell")) {
+			} else if (typeClass.equals(DoubleCell.class)) {
 				objectType.set(obj, columnName, Double.valueOf(value));
-			} else if (type.toString().equals("TimestampCell")) {
+			} else if (typeClass.equals(TimestampCell.class)) {
 				objectType.set(obj, columnName, Timestamp.valueOf(value));
 			} else {
 				logger.warn(String.format("Unknown type while casting column: %s of type %s with value %s",
