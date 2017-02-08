@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="KNIME-2.12" sequenceNumber="7">
+<?pde version="3.8"?><target name="KNIME-2.12" sequenceNumber="13">
 <locations>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="com.knime.features.explorer.serverspace.feature.group" version="4.1.0.0048041"/>
+<unit id="com.knime.features.enterprise.client.feature.group" version="4.1.1.0048751"/>
+<repository location="http://www.knime.org/commercial/server/4.1"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
+<unit id="ch.qos.logback.feature.feature.group" version="1.0.7"/>
+<unit id="org.slf4j.feature.feature.group" version="1.6.6"/>
+<repository location="http://logback.qos.ch/p2/"/>
+</location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.knime.features.ext.spotfire.feature.group" version="2.12.0.0047514"/>
 <unit id="org.knime.features.build.feature.group" version="2.12.0.0047514"/>
@@ -64,24 +74,10 @@
 <repository location="http://www.knime.org/update/2.12"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="com.knime.features.explorer.serverspace.feature.group" version="4.1.0.0048041"/>
-<unit id="com.knime.features.enterprise.client.feature.group" version="4.1.1.0048751"/>
-<repository location="http://www.knime.org/commercial/server/4.1"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="ch.qos.logback.feature.feature.group" version="1.0.7"/>
-<unit id="org.slf4j.feature.feature.group" version="1.6.6"/>
-<repository location="http://logback.qos.ch/p2/"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.dymatrix.upliftmodeling.feature.feature.group" version="0.6.0.201306111407"/>
+<unit id="ws.palladian.nodes.feature.feature.group" version="1.6.0.201607271258"/>
 <unit id="com.cenix.krest.nodes.feature.feature.group" version="1.2.7.201502191505"/>
 <unit id="de.mpicbg.tds.knime.scripting.python.feature.feature.group" version="2.0.2.201505280911"/>
-<unit id="ws.palladian.nodes.feature.feature.group" version="1.6.0.201507091836"/>
 <unit id="de.mpicbg.tds.knime.scripting.r.feature.feature.group" version="2.0.3.201505280921"/>
-<unit id="de.bund.bfr.knime.esri.feature.feature.group" version="1.2.0.201508031047"/>
-<unit id="de.mpicbg.tds.knime.scripting.groovy.feature.feature.group" version="2.0.1.201505280911"/>
-<unit id="de.mpicbg.tds.knime.scripting.matlab.feature.feature.group" version="2.0.4.201505280911"/>
 <repository location="http://update.knime.org/community-contributions/trusted/2.12"/>
 </location>
 </locations>

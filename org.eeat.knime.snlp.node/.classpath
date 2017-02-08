@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/stanford-corenlp-3.5.2-models-chinese.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/stanford-corenlp-3.5.2-models-german.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/stanford-corenlp-3.5.2-models-spanish.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/dependency/stanford-corenlp-3.5.2-models.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/dependency/stanford-corenlp-3.5.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="target/dependency/stanford-parser-3.5.2.jar"/>

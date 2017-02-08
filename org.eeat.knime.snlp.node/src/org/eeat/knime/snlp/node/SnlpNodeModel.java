@@ -47,18 +47,37 @@ import edu.stanford.nlp.trees.TypedDependency;
 public class SnlpNodeModel extends NodeModel {
 
 	static final String CFG_PARSER_TYPE = "snlpParserType";
+	static final String CFG_TAGGER_LANGUAGE_TYPE = "snlpTaggerLanguageType";
 	private static final NodeLogger logger = NodeLogger.getLogger(SnlpNodeModel.class);
 	// TODO Consider adding multiple parsers for user selection.
 	static public final String[] parserTypes = { "Dependency", "ShiftReduce" };
 	static public final String CFG_MAX_SENTENCE_LENGTH = "snlpMaxSentenceLength";
+	static public final String[] taggerLanguageTypes = {"English", "Chinese", "GermanDeWac", "GermanFast", "GermanHgc", "Spanish", "Spanish-DistSim"};
 	public final String LOGGER = "logger";
 	// Stanford parser parameters.
-	protected String taggerPath = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
+	protected String taggerEnglishPath = "edu/stanford/nlp/models/pos-tagger/english-left3words/english-left3words-distsim.tagger";
+	protected String taggerChinesePath = "edu/stanford/nlp/models/pos-tagger/chinese-distsim/chinese-distsim.tagger";
+	protected String taggerGermanDeWacPath = "edu/stanford/nlp/models/pos-tagger/german/german-dewac.tagger";
+	protected String taggerGermanFastPath = "edu/stanford/nlp/models/pos-tagger/german/german-fast.tagger";
+	protected String taggerGermanHgcPath = "edu/stanford/nlp/models/pos-tagger/german/german-hgc.tagger";
+	protected String taggerSpanishDistSimPath = "edu/stanford/nlp/models/pos-tagger/spanish/spanish-distsim/spanish-distsim.tagger";
+	protected String taggerSpanishPath = "edu/stanford/nlp/models/pos-tagger/spanish/spanish-distsim/spanish.tagger";
+	
+	protected String nndepChineseModelPath = "edu/stanford/nlp/models/parser/nndep/CTB_CoNLL_params.txt.gz";
+	protected String nndepDefaultModelPath = "edu/stanford/nlp/models/parser/nndep/english_UD.gz";
+	protected String nndepStanfordModelPath = "edu/stanford/nlp/models/parser/nndep/PTB_Stanford_params.txt.gz";
+	protected String nndepCoNLLModelPath = "edu/stanford/nlp/models/parser/nndep/PTB_CoNLL_params.txt.gz";
+	static public final String[] modelTypes = {"English-default", "English-Stanford", "English-CoNLL", "Chinese-CoNLL"};
+	static final String CFG_MODEL_TYPE = "snlpModelType";
 
 	protected final String[] outputColumnNames = { "Rel", "Gov", "GovIdx", "GovTag", "Dep", "DepIdx", "DepTag",
-			"SentNum", "RowNum" };
+			"SentNum", "RowId" };
 
 	protected final SettingsModelString userParserType = new SettingsModelString(CFG_PARSER_TYPE, null);
+	
+	protected  final SettingsModelString languageType = new SettingsModelString(CFG_TAGGER_LANGUAGE_TYPE, null);
+	
+	protected  final SettingsModelString modelType = new SettingsModelString(CFG_MODEL_TYPE, null);
 	
 	protected final SettingsModelInteger  userMaxSentenceLength = new SettingsModelInteger(
 			CFG_MAX_SENTENCE_LENGTH, 8192);
@@ -70,6 +89,57 @@ public class SnlpNodeModel extends NodeModel {
 
 		// one incoming port and one outgoing port
 		super(1, 1);
+	}
+	
+	protected String taggerPath() {
+		String path;
+		switch (languageType.getStringValue()) {
+		case "English":
+			path = taggerEnglishPath;
+			break;
+		case "Chinese":
+			path = taggerChinesePath;
+			break;
+		case "GermanDeWac":
+			path = taggerGermanDeWacPath;
+			break;
+		case "GermanFast":
+			path = taggerGermanFastPath;
+			break;
+		case "GermanHgc":
+			path = taggerGermanHgcPath;
+			break;
+		case "Spanish":
+			path = taggerSpanishPath;
+			break;
+		case "Spanish-DistSim":
+			path = taggerSpanishDistSimPath;
+			break;
+		default:
+			path = taggerEnglishPath;
+		}
+		return path;
+	}
+	
+	protected String modelPath() {
+		String path;
+		switch (modelType.getStringValue()) {
+		case "English-default":
+			path = nndepDefaultModelPath;
+			break;
+		case "English-Stanford":
+			path = nndepStanfordModelPath;
+			break;
+		case "English-CoNLL":
+			path = nndepCoNLLModelPath;
+			break;
+		case "Chinese-CoNLL":
+			path = nndepChineseModelPath;
+			break;
+		default:
+			path = nndepDefaultModelPath;
+		}
+		return path;
 	}
 
 	protected BufferedDataTable collectSnlpResults(final List<List<String>> relations, final ExecutionContext exec)
@@ -126,17 +196,17 @@ public class SnlpNodeModel extends NodeModel {
 		return outputSpec;
 	}
 
-	protected List<String> dataTableToDataList(final BufferedDataTable inData) {
-		logger.debug("Converting data rows: " + inData.getRowCount());
-		if (inData.getDataTableSpec().getNumColumns() > 1) {
-			logger.warn("Only the first column will be processed.");
-		}
-		List<String> list = new ArrayList<String>();
-		for (DataRow row : inData) {
-			list.add(row.getCell(0).toString());
-		}
-		return list;
-	}
+//	protected List<String> dataTableToDataList(final BufferedDataTable inData) {
+//		logger.debug("Converting data rows: " + inData.getRowCount());
+//		if (inData.getDataTableSpec().getNumColumns() > 1) {
+//			logger.warn("Only the first column will be processed.");
+//		}
+//		List<String> list = new ArrayList<String>();
+//		for (DataRow row : inData) {
+//			list.add(row.getCell(0).toString());
+//		}
+//		return list;
+//	}
 
 	/**
 	 * {@inheritDoc}
@@ -190,29 +260,37 @@ public class SnlpNodeModel extends NodeModel {
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
 //		userParserType.loadSettingsFrom(settings);
 		userMaxSentenceLength.loadSettingsFrom(settings);
+		languageType.loadSettingsFrom(settings);
+		modelType.loadSettingsFrom(settings);
 	}
 
 	protected BufferedDataTable processWithSnlp(final BufferedDataTable inData, final ExecutionContext exec)
 			throws CanceledExecutionException {
 		logger.debug("Begin processing Snlp node.");
 		List<List<String>> resultRelations = new ArrayList<List<String>>();
-		MaxentTagger tagger = new MaxentTagger(taggerPath);
-		DependencyParser parser = DependencyParser.loadFromModelFile(DependencyParser.DEFAULT_MODEL);
-		List<String> dataList = dataTableToDataList(inData);
-		double listSize = dataList.size();
+		MaxentTagger tagger = new MaxentTagger(taggerPath());
+//		DependencyParser parser = DependencyParser.loadFromModelFile(DependencyParser.DEFAULT_MODEL);
+		DependencyParser parser = DependencyParser.loadFromModelFile(modelPath());
+		double listSize = inData.getRowCount();
 		int rowNum = 0;
-		for (String rowItem : dataList) {
+		String rowItem;
+		String rowId;
+		for (DataRow row : inData) {
+		//for (String rowItem : dataList) {
+			rowItem = row.getCell(0).toString();
+			rowId = row.getKey().toString();
 			// Don't process empty rows
 			if (rowItem.length()<=0) continue;
 			
 			// Ensure reasonable character set.			
 			String inputString;
-			inputString = new String(rowItem.getBytes(StandardCharsets.US_ASCII));
+//			inputString = new String(rowItem.getBytes(StandardCharsets.US_ASCII));
+			inputString = new String(rowItem.getBytes());
 			DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(inputString));
 			int sentNum = 0;
 			for (List<HasWord> sentence : tokenizer) {
 				try {
-					logger.debug(String.format("IN: row #%d sent#%d, length:%d: %s", rowNum, sentNum,
+					logger.debug(String.format("IN: row #%d rowID %s sent#%d, length:%d: %s", rowNum, rowId, sentNum,
 							sentence.toString().length(), sentence));
 					if (sentence.toString().length() < userMaxSentenceLength.getIntValue()) {
 						List<TaggedWord> tagged = tagger.tagSentence(sentence);
@@ -220,18 +298,18 @@ public class SnlpNodeModel extends NodeModel {
 						for (TypedDependency dep : gs.allTypedDependencies()) {
 							ArrayList<String> relation = (ArrayList<String>) formatDepenency(dep);
 							relation.add(String.format("%d", sentNum));
-							relation.add(String.format("%d", rowNum));
+							relation.add(String.format("%s", rowId));
 							resultRelations.add(relation);
 						}
 						// Print typed dependencies
-						logger.debug(String.format("OUT: row #%d sent#%d: %s", rowNum, sentNum, gs));
+						logger.debug(String.format("OUT: rowId %s sent#%d: %s", rowId, sentNum, gs));
 					} else {
 						logger.error(String.format("Sentence length execeeds maximum: %d > %d. ",
 								sentence.toString().length(), userMaxSentenceLength.getIntValue()));
 						// Add empty sentence
 						ArrayList<String> relation = (ArrayList<String>) formatDepenency();
 						relation.add(String.format("%d", sentNum));
-						relation.add(String.format("%d", rowNum));
+						relation.add(String.format("%s", rowId));
 						resultRelations.add(relation);
 					}
 
@@ -286,6 +364,8 @@ public class SnlpNodeModel extends NodeModel {
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 //		userParserType.saveSettingsTo(settings);
 		userMaxSentenceLength.saveSettingsTo(settings);
+		languageType.saveSettingsTo(settings);
+		modelType.saveSettingsTo(settings);
 	}
 
 	/**
@@ -296,6 +376,8 @@ public class SnlpNodeModel extends NodeModel {
 		// Do not actually set any values of any member variables.
 //		userParserType.validateSettings(settings);
 		userMaxSentenceLength.validateSettings(settings);
+		languageType.validateSettings(settings);
+		modelType.validateSettings(settings);
 
 	}
 

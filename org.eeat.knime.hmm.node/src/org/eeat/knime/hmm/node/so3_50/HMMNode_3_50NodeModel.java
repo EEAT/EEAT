@@ -98,7 +98,7 @@ public class HMMNode_3_50NodeModel extends NodeModel {
 		
 		int numberOfStates = Integer.parseInt(dataRow.getCell(0).toString());
 		
-		logger.info("NUMBER OF STATES:" + numberOfStates);
+		logger.debug("NUMBER OF STATES:" + numberOfStates);
 		
 		itr = inData[1].iterator();
 		
@@ -106,7 +106,7 @@ public class HMMNode_3_50NodeModel extends NodeModel {
 		
 		int numberOfObservations = Integer.parseInt(dataRow.getCell(0).toString());
 		
-		logger.info("NUMBER OF OBSERVATIONS:" + numberOfObservations);
+		logger.debug("NUMBER OF OBSERVATIONS:" + numberOfObservations);
 		
 		// State Initial Probabilities calculation
 		
@@ -120,7 +120,7 @@ public class HMMNode_3_50NodeModel extends NodeModel {
 			
 			if (dataRow.getCell(0).toString().equalsIgnoreCase("NA")) {
 				
-				logger.info("INITIAL STATE PROB MATRIX IS NOT POPULATED, USING EQUAL DISTRIBUTION OF:"  + (1.0/numberOfStates));
+				logger.debug("INITIAL STATE PROB MATRIX IS NOT POPULATED, USING EQUAL DISTRIBUTION OF:"  + (1.0/numberOfStates));
 
 				for (int i = 0; i < numberOfStates; i++) {
 					   
@@ -138,7 +138,7 @@ public class HMMNode_3_50NodeModel extends NodeModel {
 			}
 		}
 		
-		logger.info("INITIAL STATE PROB MATRIX:" + initialStateProbs);		
+		logger.debug("INITIAL STATE PROB MATRIX:" + initialStateProbs);		
     	
 		
 		// State probability matrix calculation
@@ -158,7 +158,7 @@ public class HMMNode_3_50NodeModel extends NodeModel {
 			if (dataRow.getCell(0).toString().equalsIgnoreCase("NA")) {
 				
 				
-				logger.info("STATE PROB MATRIX IS NOT POPULATED, USING EQUAL DISTRIBUTION OF:"  + (1.0/numberOfStates));
+				logger.debug("STATE PROB MATRIX IS NOT POPULATED, USING EQUAL DISTRIBUTION OF:"  + (1.0/numberOfStates));
 				
 				for (int i = 0; i < numberOfStates; i++) {
 					
@@ -187,7 +187,7 @@ public class HMMNode_3_50NodeModel extends NodeModel {
 			rowInMatrix++;
 		}
 		
-		logger.info("STATE PROB MATRIX:" + stateProbs);
+		logger.debug("STATE PROB MATRIX:" + stateProbs);
 		
 		
 		
@@ -234,7 +234,7 @@ public class HMMNode_3_50NodeModel extends NodeModel {
 		
 		
 		
-		logger.info("EMISSION PROB MATRIX:" + emissionProbs);		
+		logger.debug("EMISSION PROB MATRIX:" + emissionProbs);		
 		
 
 //		int readCount = 0;
@@ -308,7 +308,7 @@ public class HMMNode_3_50NodeModel extends NodeModel {
 
 		// while (itr.hasNext()) {
 
-		// logger.info("HELLO:" + itr.next());
+		// logger.debug("HELLO:" + itr.next());
 
 		// }
 		
@@ -329,7 +329,7 @@ public class HMMNode_3_50NodeModel extends NodeModel {
 
 		while (itr1.hasNext()) {
 
-			// logger.info("row:" + k++);
+			// logger.debug("row:" + k++);
 
 			dataRow = itr1.next();
 
@@ -348,7 +348,7 @@ public class HMMNode_3_50NodeModel extends NodeModel {
 
 			Object[] obj = new String[] { ss };
 
-			logger.info("-------------->" + ss);
+			logger.debug("-------------->" + ss);
 
 			list.add(obj);
 
@@ -793,7 +793,7 @@ public class HMMNode_3_50NodeModel extends NodeModel {
 
 		for (int i = 0; i < sequenceList.get(0).size(); i++) {
 
-			logger.info("++++++++++++++:" + (sequenceList.get(0).get(i))[0]);
+			logger.debug("++++++++++++++:" + (sequenceList.get(0).get(i))[0]);
 		}
 
 		hmm = HMMCreator.buildHmm7(opdfList, sequenceList, initialStateProbs, stateProbs, numberOfStates, numberOfObservations);
@@ -801,7 +801,7 @@ public class HMMNode_3_50NodeModel extends NodeModel {
 //		buildHmm2(
 //				double[] opdfList, ArrayList<ArrayList<Object[]>> sequenceList, List<Double> initialStateProbs, Map<Integer, List<Double>> stateProbs, int numberOfStates, int numberOfObservations) 
 
-		logger.info("DONEEEEEEEEEEEEEEEEEEEEEE:" + hmm); 
+		logger.debug("DONEEEEEEEEEEEEEEEEEEEEEE:" + hmm); 
 
 		// the data table spec of the single output table,
 		// the table will have three columns:
